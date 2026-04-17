@@ -1,0 +1,10 @@
+.DS_Store
+Thumbs.db
+desktop.ini
+
+.netlify
+.cache
+.npm-cache
+node_modules
+
+*.log

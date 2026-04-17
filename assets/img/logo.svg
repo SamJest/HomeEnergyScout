@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 160" role="img" aria-labelledby="title desc">
+  <title id="title">Home Energy Scout logo</title>
+  <desc id="desc">Home Energy Scout wordmark with a rounded square energy icon.</desc>
+  <defs>
+    <linearGradient id="iconBg" x1="18" y1="18" x2="126" y2="130" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#155eef"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </linearGradient>
+    <linearGradient id="iconBolt" x1="46" y1="34" x2="92" y2="118" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#dbe7ff"/>
+    </linearGradient>
+  </defs>
+  <rect x="18" y="18" width="112" height="112" rx="30" fill="url(#iconBg)"/>
+  <path d="M78 34 47 81h20l-8 37 35-53H75z" fill="url(#iconBolt)"/>
+  <text x="162" y="66" fill="#152033" font-family="'Segoe UI', Arial, sans-serif" font-size="38" font-weight="700" letter-spacing="-0.04em">
+    Home Energy Scout
+  </text>
+  <text x="162" y="102" fill="#4b5a73" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="600">
+    UK home energy costs, savings and sizing
+  </text>
+</svg>
