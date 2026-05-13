@@ -1,10 +1,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import {
+  pagePathFromFile,
+  readContentData
+} from './lib/content-data.mjs';
 
 const root = process.cwd();
 const issues = [];
 const htmlFiles = [];
+const { energyRates } = readContentData();
+const currentEnergyPeriod = energyRates.currentPeriod;
+const currentElectricityRate = String(currentEnergyPeriod.electricityUnitRatePence);
 
 const requiredHeadSnippets = [
   '<link rel="canonical"',
@@ -63,11 +70,16 @@ function addIssue(file, message) {
 
 walk(root);
 
+if (new Date(`${currentEnergyPeriod.reviewDue}T00:00:00Z`) < new Date()) {
+  addIssue('data/energy-rates.json', `energy rates are past reviewDue ${currentEnergyPeriod.reviewDue}`);
+}
+
 for (const file of htmlFiles) {
   const rel = relative(file);
   const text = fs.readFileSync(file, 'utf8');
   const config = extractPageConfig(text);
   const ids = new Set(Array.from(text.matchAll(/\sid="([^"]+)"/g)).map((match) => match[1]));
+  const canonicalPath = config?.path || config?.canonical || pagePathFromFile(file);
 
   if (!config) {
     addIssue(rel, 'missing window.pageConfig');
@@ -113,8 +125,34 @@ for (const file of htmlFiles) {
     }
   }
 
+  for (const tariffMatch of text.matchAll(/<input[^>]+name="tariffPence"[^>]*>/g)) {
+    const valueMatch = tariffMatch[0].match(/\svalue="([^"]+)"/i);
+    if (!valueMatch) {
+      addIssue(rel, 'tariffPence input is missing a shared default value');
+    } else if (Number(valueMatch[1]) !== Number(currentElectricityRate)) {
+      addIssue(rel, `tariffPence input uses ${valueMatch[1]}p instead of shared ${currentElectricityRate}p default`);
+    }
+  }
+
+  if (config.contentCluster && config.relatedRoutes?.length < 2) {
+    addIssue(rel, `cluster page ${config.contentCluster} needs at least two relatedRoutes in pageConfig`);
+  }
+
+  if (config.pageType === 'calculator' && config.contentCluster && !text.includes('source-note') && !text.includes('source-panel')) {
+    addIssue(rel, 'cluster calculator page is missing visible source notes');
+  }
+
+  if (Array.isArray(config.faq) && config.faq.length) {
+    const visibleQuestions = Array.from(text.matchAll(/<details[^>]*class="[^"]*faq-item[^"]*"[^>]*data-question="([^"]*)"/gi)).map((match) => match[1]);
+    for (const item of config.faq) {
+      if (!visibleQuestions.includes(item.question)) {
+        addIssue(rel, `pageConfig FAQ is not visible on page: ${item.question}`);
+      }
+    }
+  }
+
   const canonicalMatch = text.match(/<link rel="canonical" href="([^"]+)"/i);
-  const expectedCanonical = `https://www.homeenergyscout.co.uk${config.canonical || '/'}`;
+  const expectedCanonical = `https://www.homeenergyscout.co.uk${config.canonical || canonicalPath || '/'}`;
   if (!canonicalMatch) {
     addIssue(rel, 'missing canonical tag');
   } else if (canonicalMatch[1] !== expectedCanonical) {

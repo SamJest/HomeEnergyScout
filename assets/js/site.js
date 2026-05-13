@@ -14,7 +14,9 @@
     { href: '/about/', label: 'About' }
   ];
   const canonicalUrl = `${baseUrl}${pageConfig.canonical || '/'}`;
-  const reviewedDate = '2026-04-16';
+  const reviewedDate = pageConfig.lastSubstantiveUpdate || pageConfig.reviewedDate || '2026-04-16';
+  const energyRates = pageConfig.energyRates?.currentPeriod || {};
+  const calculatorDefaults = pageConfig.calculatorDefaults || {};
   const defaultSocialImagePath = '/assets/img/social-share.png';
   const socialImagePath = pageConfig.socialImage || defaultSocialImagePath;
   const socialImageUrl = socialImagePath.startsWith('http') ? socialImagePath : `${baseUrl}${socialImagePath}`;
@@ -137,7 +139,14 @@
   function renderRelatedPathways() {
     const mount = document.getElementById('main-content');
     if (!mount || !pageConfig.path) return;
-    const config = relatedPathways[pageConfig.path] || relatedPathways[pageConfig.canonical || ''];
+    const configuredRoutes = Array.isArray(pageConfig.relatedRoutes) && pageConfig.relatedRoutes.length
+      ? {
+          heading: 'Best next clicks from this page',
+          intro: 'Use these routes when the first answer turns into sizing, comparison or a wider cost decision.',
+          links: pageConfig.relatedRoutes
+        }
+      : null;
+    const config = configuredRoutes || relatedPathways[pageConfig.path] || relatedPathways[pageConfig.canonical || ''];
     if (!config || pageConfig.path === '/contact/' || pageConfig.path === '/privacy/' || pageConfig.path === '/terms/' || pageConfig.path === '/about/' || pageConfig.path === '/404.html') return;
 
     const section = document.createElement('section');
@@ -426,6 +435,14 @@
       about: 'UK home energy running costs, savings and practical household decisions'
     };
 
+    if (Array.isArray(pageConfig.dataSources) && pageConfig.dataSources.length) {
+      pageNode.citation = pageConfig.dataSources.map((source) => ({
+        '@type': 'CreativeWork',
+        name: source.name,
+        url: source.url
+      }));
+    }
+
     if (pageConfig.breadcrumbs && pageConfig.breadcrumbs.length) {
       pageNode.breadcrumb = { '@id': `${canonicalUrl}#breadcrumbs` };
     }
@@ -509,7 +526,7 @@
     document.querySelectorAll('details.faq-item').forEach((item) =>
       item.addEventListener('toggle', () => {
         if (item.open) {
-          window.homeEnergyScout.track('faq_toggle', {
+          window.homeEnergyScout.track('faq_open', {
             question: item.dataset.question || item.querySelector('summary')?.textContent?.trim() || 'FAQ',
             page: pageConfig.path
           });
@@ -560,7 +577,7 @@
   function addInternalLinkTracking() {
     document.querySelectorAll('a[data-track-link]').forEach((link) =>
       link.addEventListener('click', () =>
-        window.homeEnergyScout.track('internal_related_click', {
+        window.homeEnergyScout.track('internal_link_click', {
           target: link.getAttribute('href'),
           label: link.textContent.trim(),
           context: getLinkContext(link),
@@ -579,7 +596,7 @@
       entries.forEach((entry) => {
         if (entry.isIntersecting && !observed.has(entry.target)) {
           observed.add(entry.target);
-          window.homeEnergyScout.track('ad_slot_viewable', {
+          window.homeEnergyScout.track('ad_slot_view', {
             slotLabel: entry.target.getAttribute('aria-label') || 'Future advertising placement',
             page: pageConfig.path
           });
@@ -1538,6 +1555,25 @@
     'portable-ac-vs-fan': portableAcVsFanCalculator
   };
 
+  function applyCalculatorDefaults(form, calculatorKey) {
+    const defaults = calculatorDefaults[calculatorKey] || {};
+    Object.entries(defaults).forEach(([name, value]) => {
+      const field = form.querySelector(`[name="${name}"]`);
+      if (!field || field.dataset.keepDefault === 'true') return;
+      field.value = value;
+      if ('defaultValue' in field) field.defaultValue = value;
+    });
+    if (energyRates.electricityUnitRatePence) {
+      form.querySelectorAll('[name="tariffPence"]').forEach((field) => {
+        if (!field.dataset.keepDefault && !defaults.tariffPence) {
+          field.value = energyRates.electricityUnitRatePence;
+          field.defaultValue = energyRates.electricityUnitRatePence;
+        }
+        field.dataset.rateSource = energyRates.id || 'shared-energy-rate';
+      });
+    }
+  }
+
   function bindCalculators() {
     document.querySelectorAll('form[data-calculator]').forEach((form) => {
       const calculatorKey = form.dataset.calculator;
@@ -1545,6 +1581,7 @@
       const validator = validators[calculatorKey];
       const panel = document.getElementById(form.dataset.resultsTarget);
       if (!calculator || !panel) return;
+      applyCalculatorDefaults(form, calculatorKey);
       panel.setAttribute('role', 'status');
       panel.setAttribute('aria-live', 'polite');
       panel.setAttribute('aria-atomic', 'true');
@@ -1594,6 +1631,10 @@
 
       form.addEventListener('submit', (event) => {
         event.preventDefault();
+        window.homeEnergyScout.track('calculator_submit', {
+          page: pageConfig.path,
+          tool: calculatorKey
+        });
         run('submit');
       });
 
@@ -1611,6 +1652,7 @@
         field.addEventListener('change', () => {
           window.homeEnergyScout.track('calculator_input_change', {
             page: pageConfig.path,
+            tool: calculatorKey,
             field: field.name
           });
           liveRun();

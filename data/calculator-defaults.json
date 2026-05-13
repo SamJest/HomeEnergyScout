@@ -1,0 +1,37 @@
+{
+  "defaultElectricityRatePence": 24.67,
+  "defaultGasRatePence": 5.74,
+  "calculators": {
+    "appliance": {
+      "tariffPence": 24.67
+    },
+    "heater": {
+      "watts": 2000,
+      "hoursPerDay": 4,
+      "daysPerWeek": 5,
+      "dutyCycle": 65,
+      "tariffPence": 24.67
+    },
+    "dehumidifier": {
+      "tariffPence": 24.67
+    },
+    "led-lighting": {
+      "tariffPence": 24.67
+    },
+    "old-fridge-replacement": {
+      "tariffPence": 24.67
+    },
+    "heater-size": {
+      "tariffPence": 24.67
+    },
+    "heating-comparison": {
+      "tariffPence": 24.67
+    },
+    "heated-airer-vs-tumble-dryer": {
+      "tariffPence": 24.67
+    },
+    "portable-ac-vs-fan": {
+      "tariffPence": 24.67
+    }
+  }
+}

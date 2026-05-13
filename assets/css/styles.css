@@ -717,3 +717,72 @@ summary:focus-visible {
   font-size: 0.78rem;
   font-weight: 700;
 }
+
+/* Traffic upgrade: sourced calculation pages */
+.answer-summary--strong {
+  border-left: 4px solid var(--accent);
+  background: #f8fafc;
+}
+
+.source-note {
+  margin-top: 0.85rem;
+  color: var(--text-soft);
+  font-size: 0.95rem;
+}
+
+.source-panel {
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: #fff;
+}
+
+.source-panel h2 {
+  margin-top: 0;
+}
+
+.cost-table-wrap {
+  margin-top: 1rem;
+}
+
+.comparison-table caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: 800;
+  padding: 0.75rem 0;
+  color: var(--text);
+}
+
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-wrap table {
+  min-width: 720px;
+}
+
+.kpi-strip .kpi-chip {
+  border-radius: var(--radius-md);
+}
+
+.kpi-chip strong {
+  display: block;
+  font-size: 1.12rem;
+  color: var(--text);
+}
+
+.kpi-chip span {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}
+
+.tool-highlight-grid {
+  align-items: stretch;
+}
+
+.tool-highlight p {
+  margin-bottom: 0;
+}

@@ -1,12 +1,18 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import {
+  mergePageConfig,
+  pagePathFromFile,
+  readContentData
+} from './lib/content-data.mjs';
 
 const root = process.cwd();
 const baseUrl = 'https://www.homeenergyscout.co.uk';
+const { energyRates, calculatorDefaults, pageByPath } = readContentData();
 const socialImageUrl = `${baseUrl}/assets/img/social-share.png`;
 const socialImageAlt = 'Home Energy Scout UK household energy tools and calculators';
-const reviewedDate = '2026-04-16';
+const fallbackReviewedDate = '2026-04-16';
 
 const navigation = [
   { href: '/running-costs/', label: 'Running costs', key: 'running-costs' },
@@ -158,6 +164,7 @@ function buildSchema(config, title, description, text) {
   if (config.noindex) return '';
 
   const canonicalUrl = getCanonicalUrl(config);
+  const dateModified = config.lastSubstantiveUpdate || config.reviewedDate || fallbackReviewedDate;
   const graph = [
     {
       '@type': 'Organization',
@@ -185,7 +192,7 @@ function buildSchema(config, title, description, text) {
     description,
     url: canonicalUrl,
     inLanguage: 'en-GB',
-    dateModified: reviewedDate,
+    dateModified,
     isPartOf: { '@id': `${baseUrl}/#website` },
     publisher: { '@id': `${baseUrl}/#organization` },
     primaryImageOfPage: {
@@ -201,6 +208,14 @@ function buildSchema(config, title, description, text) {
 
   if (config.pageType === 'calculator') {
     pageNode.mainEntity = { '@id': `${canonicalUrl}#calculator` };
+  }
+
+  if (Array.isArray(config.dataSources) && config.dataSources.length) {
+    pageNode.citation = config.dataSources.map((source) => ({
+      '@type': 'CreativeWork',
+      name: source.name,
+      url: source.url
+    }));
   }
 
   graph.push(pageNode);
@@ -374,8 +389,11 @@ function replaceMount(text, id, markerName, innerHtml) {
 
 for (const file of walk(root)) {
   let text = fs.readFileSync(file, 'utf8');
-  const config = extractPageConfig(text);
+  let config = extractPageConfig(text);
   if (!config) continue;
+  const filePath = pagePathFromFile(file);
+  const dataPage = pageByPath.get(config.path || config.canonical || filePath) || pageByPath.get(filePath);
+  config = mergePageConfig({ ...config, path: config.path || filePath }, dataPage, energyRates, calculatorDefaults);
 
   const title = getHeadValue(text, /<title>([\s\S]*?)<\/title>/i) || config.title || '';
   const description = getHeadValue(text, /<meta name="description" content="([\s\S]*?)"/i) || config.description || '';
@@ -387,7 +405,10 @@ for (const file of walk(root)) {
   text = stripStaticBlock(text, '<!-- launch-schema:start -->', '<!-- launch-schema:end -->');
 
   text = text.replace(/(<meta name="description" content="[\s\S]*?">)/i, `$1\n${launchMeta}`);
-  text = text.replace(/(<script[^>]*>\s*window\.pageConfig[\s\S]*?<\/script>)/i, `$1${schemaBlock ? `\n${schemaBlock}` : ''}`);
+  text = text.replace(
+    /<script[^>]*>\s*window\.pageConfig[\s\S]*?<\/script>/i,
+    `<script>window.pageConfig = ${JSON.stringify(config)};</script>${schemaBlock ? `\n${schemaBlock}` : ''}`
+  );
 
   text = replaceMount(text, 'site-header', 'static-header', buildHeader(config));
   if (config.breadcrumbs?.length) {

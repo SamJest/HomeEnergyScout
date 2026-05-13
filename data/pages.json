@@ -1,0 +1,310 @@
+{
+  "pages": [
+    {
+      "path": "/running-costs/electric-heater-running-cost/",
+      "title": "Electric Heater Running Cost Calculator UK | Home Energy Scout",
+      "description": "Use the UK electric heater running cost calculator, with 2kW heater examples, monthly cost tables and current Ofgem-backed electricity assumptions.",
+      "navKey": "running-costs",
+      "breadcrumbs": [
+        { "label": "Running costs", "href": "/running-costs/" },
+        { "label": "Electric heater running cost", "href": "/running-costs/electric-heater-running-cost/" }
+      ],
+      "pageType": "calculator",
+      "calculatorKey": "heater",
+      "contentCluster": "electric-heating",
+      "template": "electric-heater-flagship",
+      "reviewedDate": "2026-05-12",
+      "lastSubstantiveUpdate": "2026-05-12",
+      "dataSources": ["ofgem-price-cap-2026-q2"],
+      "relatedRoutes": [
+        { "href": "/running-costs/2kw-heater-cost-per-hour/", "eyebrow": "Exact query", "title": "2kW heater cost per hour", "text": "Use this when you want the quick 2kW answer before adjusting your own runtime." },
+        { "href": "/running-costs/electric-heating-cost-per-month/", "eyebrow": "Monthly view", "title": "Electric heating cost per month", "text": "Useful when the question is about winter bill impact rather than one evening." },
+        { "href": "/sizing/heater-room-size-calculator/", "eyebrow": "Check fit", "title": "Heater room size calculator", "text": "Check whether the heater is matched to the room before blaming the tariff." }
+      ],
+      "faq": [
+        { "question": "How much does a 2kW heater cost per hour in the UK?", "answer": "At 24.67p per kWh, a 2kW heater costs about 49p per hour at full power. If it cycles down after the room warms up, the average cost can be lower." },
+        { "question": "How much does electric heating cost per month?", "answer": "A 2kW heater used four hours a day at full power costs about GBP 59.21 over a 30-day month at 24.67p per kWh. Regular whole-room electric heating can therefore become expensive quickly." },
+        { "question": "Do oil radiators, fan heaters and panel heaters cost different amounts to run?", "answer": "At the same wattage and runtime, direct electric heaters cost the same per kWh. The practical difference is warm-up speed, comfort, controls and how long the heater stays near full output." }
+      ]
+    },
+    {
+      "path": "/running-costs/2kw-heater-cost-per-hour/",
+      "title": "2kW Heater Cost Per Hour UK | Home Energy Scout",
+      "description": "See what a 2kW heater costs per hour, evening, week and month in the UK using the current Ofgem electricity benchmark.",
+      "navKey": "running-costs",
+      "breadcrumbs": [
+        { "label": "Running costs", "href": "/running-costs/" },
+        { "label": "2kW heater cost per hour", "href": "/running-costs/2kw-heater-cost-per-hour/" }
+      ],
+      "contentCluster": "electric-heating",
+      "template": "electric-heating-guide",
+      "h1": "2kW heater cost per hour in the UK",
+      "kicker": "Electric heating cost",
+      "lead": "A 2kW heater is one of the most common UK portable heater sizes, so it is the fastest way to understand how direct electric room heat affects a bill.",
+      "primaryWatts": 2000,
+      "defaultHours": 4,
+      "summary": "At the current 24.67p/kWh benchmark, a 2kW heater costs about 49p for one hour at full power.",
+      "angle": "This page is best for the exact hourly answer. Use the main calculator when you want to adjust duty cycle, days per week or your own tariff.",
+      "reviewedDate": "2026-05-12",
+      "lastSubstantiveUpdate": "2026-05-12",
+      "dataSources": ["ofgem-price-cap-2026-q2"],
+      "relatedRoutes": [
+        { "href": "/running-costs/electric-heater-running-cost/", "eyebrow": "Calculator", "title": "Electric heater running cost", "text": "Adjust wattage, duty cycle and weekly use." },
+        { "href": "/running-costs/electric-heating-cost-per-month/", "eyebrow": "Monthly", "title": "Electric heating cost per month", "text": "See what regular use does to a monthly bill." },
+        { "href": "/compare/oil-radiator-vs-fan-heater/", "eyebrow": "Compare", "title": "Oil radiator vs fan heater", "text": "Compare the practical heater choice after the cost baseline." }
+      ],
+      "faq": [
+        { "question": "Is a 2kW heater expensive to run?", "answer": "It can be. One hour is about 49p at 24.67p/kWh, but four hours every day is about GBP 59 over a 30-day month at full power." },
+        { "question": "Does a 2kW oil radiator cost less than a 2kW fan heater?", "answer": "Not at full power. Both use 2kWh per hour at full output. The real difference is how they heat the room and how often their thermostat cycles." }
+      ]
+    },
+    {
+      "path": "/running-costs/electric-heating-cost-per-month/",
+      "title": "Electric Heating Cost Per Month UK | Home Energy Scout",
+      "description": "Estimate electric heating cost per month in the UK, with 1kW, 1.5kW, 2kW and 2.5kW examples using current electricity rates.",
+      "navKey": "running-costs",
+      "breadcrumbs": [
+        { "label": "Running costs", "href": "/running-costs/" },
+        { "label": "Electric heating cost per month", "href": "/running-costs/electric-heating-cost-per-month/" }
+      ],
+      "contentCluster": "electric-heating",
+      "template": "electric-heating-guide",
+      "h1": "Electric heating cost per month",
+      "kicker": "Monthly cost guide",
+      "lead": "Monthly electric heating cost depends on wattage, hours and how much the heater cycles down once the room is warm.",
+      "primaryWatts": 2000,
+      "defaultHours": 4,
+      "summary": "A 2kW heater used four hours a day at full power costs about GBP 59.21 over 30 days at 24.67p/kWh.",
+      "angle": "This page is best when you are trying to estimate the winter bill effect of regular room heating.",
+      "reviewedDate": "2026-05-12",
+      "lastSubstantiveUpdate": "2026-05-12",
+      "dataSources": ["ofgem-price-cap-2026-q2"],
+      "relatedRoutes": [
+        { "href": "/running-costs/electric-heater-running-cost/", "eyebrow": "Calculator", "title": "Electric heater running cost", "text": "Model your actual use pattern." },
+        { "href": "/compare/gas-vs-electric-heating/", "eyebrow": "System view", "title": "Gas vs electric heating", "text": "Check the wider whole-home comparison." },
+        { "href": "/guides/is-electric-heating-expensive/", "eyebrow": "Verdict", "title": "Is electric heating expensive?", "text": "Put the monthly number into context." }
+      ],
+      "faq": [
+        { "question": "How do I calculate monthly electric heating cost?", "answer": "Multiply watts divided by 1000 by hours used, days used and electricity price per kWh. For a 2kW heater used four hours for 30 days at 24.67p/kWh, the monthly cost is about GBP 59.21." },
+        { "question": "Why can the real monthly cost be lower than the full-power table?", "answer": "A thermostat-controlled heater may cycle down once the room is warm. Poorly insulated or oversized spaces can keep the heater closer to full power for longer." }
+      ]
+    },
+    {
+      "path": "/running-costs/fan-heater-running-cost/",
+      "title": "Fan Heater Running Cost UK | Home Energy Scout",
+      "description": "Estimate fan heater running costs in the UK, including 2kW examples and when fast warm-up becomes expensive.",
+      "navKey": "running-costs",
+      "breadcrumbs": [
+        { "label": "Running costs", "href": "/running-costs/" },
+        { "label": "Fan heater running cost", "href": "/running-costs/fan-heater-running-cost/" }
+      ],
+      "contentCluster": "electric-heating",
+      "template": "electric-heating-guide",
+      "h1": "Fan heater running cost",
+      "kicker": "Heater type cost",
+      "lead": "Fan heaters warm a person or small room quickly, but common 2kW models can become expensive if they run for long sessions.",
+      "primaryWatts": 2000,
+      "defaultHours": 3,
+      "summary": "A 2kW fan heater costs about 49p per hour at full power using 24.67p/kWh electricity.",
+      "angle": "Best for quick bursts and short warm-up periods; less attractive for long steady heating in a poor-fit room.",
+      "reviewedDate": "2026-05-12",
+      "lastSubstantiveUpdate": "2026-05-12",
+      "dataSources": ["ofgem-price-cap-2026-q2"],
+      "relatedRoutes": [
+        { "href": "/compare/oil-radiator-vs-fan-heater/", "eyebrow": "Compare", "title": "Oil radiator vs fan heater", "text": "Use this when comfort and warm-up speed matter." },
+        { "href": "/running-costs/2kw-heater-cost-per-hour/", "eyebrow": "Exact cost", "title": "2kW heater cost per hour", "text": "See the full-power 2kW benchmark." },
+        { "href": "/sizing/heater-room-size-calculator/", "eyebrow": "Fit check", "title": "Heater room size calculator", "text": "Check whether the room needs more heat than a fan heater can sensibly provide." }
+      ],
+      "faq": [
+        { "question": "Are fan heaters cheap to run?", "answer": "They can be cheap for short bursts, but a common 2kW fan heater costs about 49p per hour at full power." },
+        { "question": "Why does a fan heater feel expensive?", "answer": "It often heats quickly but loses comfort quickly after switching off, so people may run it for longer or more often than expected." }
+      ]
+    },
+    {
+      "path": "/running-costs/oil-filled-radiator-running-cost/",
+      "title": "Oil-Filled Radiator Running Cost UK | Home Energy Scout",
+      "description": "Estimate oil-filled radiator running costs in the UK and compare full-power cost with real thermostat cycling.",
+      "navKey": "running-costs",
+      "breadcrumbs": [
+        { "label": "Running costs", "href": "/running-costs/" },
+        { "label": "Oil-filled radiator running cost", "href": "/running-costs/oil-filled-radiator-running-cost/" }
+      ],
+      "contentCluster": "electric-heating",
+      "template": "electric-heating-guide",
+      "h1": "Oil-filled radiator running cost",
+      "kicker": "Heater type cost",
+      "lead": "Oil-filled radiators are still direct electric heaters, but their slower, steadier feel can change how people use them.",
+      "primaryWatts": 1500,
+      "defaultHours": 5,
+      "summary": "A 1.5kW oil-filled radiator costs about 37p per hour at full power using 24.67p/kWh electricity.",
+      "angle": "The cost advantage usually comes from thermostat cycling and comfort pattern, not from a different price per kWh.",
+      "reviewedDate": "2026-05-12",
+      "lastSubstantiveUpdate": "2026-05-12",
+      "dataSources": ["ofgem-price-cap-2026-q2"],
+      "relatedRoutes": [
+        { "href": "/compare/oil-radiator-vs-fan-heater/", "eyebrow": "Compare", "title": "Oil radiator vs fan heater", "text": "Pick the better room-heating style." },
+        { "href": "/running-costs/electric-heater-running-cost/", "eyebrow": "Calculator", "title": "Electric heater running cost", "text": "Adjust wattage and duty cycle." },
+        { "href": "/running-costs/panel-heater-running-cost/", "eyebrow": "Alternative", "title": "Panel heater running cost", "text": "Compare with another steady electric heater." }
+      ],
+      "faq": [
+        { "question": "Is an oil-filled radiator cheaper than a fan heater?", "answer": "At the same wattage and runtime, no. It may feel more economical if the thermostat cycles down and the room holds heat well." },
+        { "question": "Does the oil inside reduce electricity use?", "answer": "The oil stores and releases heat, but the electricity used still depends on wattage, runtime and thermostat behaviour." }
+      ]
+    },
+    {
+      "path": "/running-costs/panel-heater-running-cost/",
+      "title": "Panel Heater Running Cost UK | Home Energy Scout",
+      "description": "Estimate panel heater running costs in the UK, with hourly and monthly examples for common wattages.",
+      "navKey": "running-costs",
+      "breadcrumbs": [
+        { "label": "Running costs", "href": "/running-costs/" },
+        { "label": "Panel heater running cost", "href": "/running-costs/panel-heater-running-cost/" }
+      ],
+      "contentCluster": "electric-heating",
+      "template": "electric-heating-guide",
+      "h1": "Panel heater running cost",
+      "kicker": "Heater type cost",
+      "lead": "Panel heaters are simple direct electric room heaters. Their bill impact depends heavily on wattage, hours and controls.",
+      "primaryWatts": 1500,
+      "defaultHours": 4,
+      "summary": "A 1.5kW panel heater costs about 37p per hour at full power using 24.67p/kWh electricity.",
+      "angle": "Best judged as a controlled room-heating option, not as a special low-cost form of electricity.",
+      "reviewedDate": "2026-05-12",
+      "lastSubstantiveUpdate": "2026-05-12",
+      "dataSources": ["ofgem-price-cap-2026-q2"],
+      "relatedRoutes": [
+        { "href": "/compare/panel-heater-vs-oil-radiator/", "eyebrow": "Compare", "title": "Panel heater vs oil radiator", "text": "Compare two steadier electric heating options." },
+        { "href": "/running-costs/electric-heater-running-cost/", "eyebrow": "Calculator", "title": "Electric heater running cost", "text": "Model panel heater duty cycle and schedule." },
+        { "href": "/guides/is-electric-heating-expensive/", "eyebrow": "Context", "title": "Is electric heating expensive?", "text": "Understand the wider electric-heating verdict." }
+      ],
+      "faq": [
+        { "question": "Are panel heaters expensive to run?", "answer": "They can be if used as regular room heating for long hours. A 1.5kW panel heater is about 37p per hour at full power on the current benchmark." },
+        { "question": "Do smart controls make panel heaters cheaper?", "answer": "Controls can reduce wasted runtime, but they do not change the underlying cost per kWh." }
+      ]
+    },
+    {
+      "path": "/running-costs/infrared-heater-running-cost/",
+      "title": "Infrared Heater Running Cost UK | Home Energy Scout",
+      "description": "Estimate infrared heater running costs in the UK and understand when lower wattage helps or does not help.",
+      "navKey": "running-costs",
+      "breadcrumbs": [
+        { "label": "Running costs", "href": "/running-costs/" },
+        { "label": "Infrared heater running cost", "href": "/running-costs/infrared-heater-running-cost/" }
+      ],
+      "contentCluster": "electric-heating",
+      "template": "electric-heating-guide",
+      "h1": "Infrared heater running cost",
+      "kicker": "Heater type cost",
+      "lead": "Infrared heaters often use lower wattages than fan heaters, but the value depends on whether they warm the person or zone you actually care about.",
+      "primaryWatts": 800,
+      "defaultHours": 4,
+      "summary": "An 800W infrared heater costs about 20p per hour at full power using 24.67p/kWh electricity.",
+      "angle": "Infrared can look cheaper when it targets a person or zone instead of trying to heat a whole cold room.",
+      "reviewedDate": "2026-05-12",
+      "lastSubstantiveUpdate": "2026-05-12",
+      "dataSources": ["ofgem-price-cap-2026-q2"],
+      "relatedRoutes": [
+        { "href": "/running-costs/electric-heater-running-cost/", "eyebrow": "Calculator", "title": "Electric heater running cost", "text": "Compare your own wattage and schedule." },
+        { "href": "/compare/heating-option-comparison/", "eyebrow": "Compare", "title": "Heating option comparison", "text": "Check whether infrared suits the room use." },
+        { "href": "/sizing/heater-room-size-calculator/", "eyebrow": "Fit check", "title": "Heater room size calculator", "text": "Check whether you need room heat or targeted comfort." }
+      ],
+      "faq": [
+        { "question": "Are infrared heaters cheaper to run?", "answer": "They can be cheaper per hour if the wattage is lower, but only if the targeted heat solves the comfort problem." },
+        { "question": "Can an infrared heater replace room heating?", "answer": "Sometimes for spot heating, but it may not be enough if the whole room needs to be warm." }
+      ]
+    },
+    {
+      "path": "/running-costs/electric-boiler-running-cost/",
+      "title": "Electric Boiler Running Cost UK | Home Energy Scout",
+      "description": "Estimate electric boiler running costs in the UK and why whole-home direct electric heating can become expensive.",
+      "navKey": "running-costs",
+      "breadcrumbs": [
+        { "label": "Running costs", "href": "/running-costs/" },
+        { "label": "Electric boiler running cost", "href": "/running-costs/electric-boiler-running-cost/" }
+      ],
+      "contentCluster": "electric-heating",
+      "template": "electric-heating-guide",
+      "h1": "Electric boiler running cost",
+      "kicker": "Whole-home heating cost",
+      "lead": "Electric boilers can be simple to install in some homes, but they use electricity for whole-home heat, so the monthly cost can climb quickly.",
+      "primaryWatts": 9000,
+      "defaultHours": 2,
+      "summary": "A 9kW electric boiler uses 9kWh in one hour at full output, costing about GBP 2.22 at 24.67p/kWh.",
+      "angle": "This page is a high-level cost sense-check, not an installer heat-loss design or tariff quote.",
+      "reviewedDate": "2026-05-12",
+      "lastSubstantiveUpdate": "2026-05-12",
+      "dataSources": ["ofgem-price-cap-2026-q2"],
+      "relatedRoutes": [
+        { "href": "/compare/gas-vs-electric-heating/", "eyebrow": "Compare", "title": "Gas vs electric heating", "text": "Check the wider whole-home economics." },
+        { "href": "/guides/is-electric-heating-expensive/", "eyebrow": "Context", "title": "Is electric heating expensive?", "text": "Understand why whole-home electric heat is different from occasional room heat." },
+        { "href": "/methodology/", "eyebrow": "Assumptions", "title": "Methodology", "text": "Review how Home Energy Scout handles estimate limits." }
+      ],
+      "faq": [
+        { "question": "Why can an electric boiler be expensive to run?", "answer": "It is using electricity for whole-home heat. Electricity unit prices are much higher than gas unit prices in the current Ofgem benchmark." },
+        { "question": "Is this an installation cost estimate?", "answer": "No. This page focuses on running-cost logic and should not replace quotes or a proper heat-loss assessment." }
+      ]
+    },
+    {
+      "path": "/guides/is-electric-heating-expensive/",
+      "title": "Is Electric Heating Expensive in the UK? | Home Energy Scout",
+      "description": "Understand when electric heating is expensive in the UK, when it can still make sense, and how current electricity and gas rates change the answer.",
+      "navKey": "guides",
+      "breadcrumbs": [
+        { "label": "Guides", "href": "/guides/" },
+        { "label": "Is electric heating expensive?", "href": "/guides/is-electric-heating-expensive/" }
+      ],
+      "contentCluster": "electric-heating",
+      "template": "electric-heating-guide",
+      "h1": "Is electric heating expensive in the UK?",
+      "kicker": "Electric heating verdict",
+      "lead": "Electric heating is not automatically wrong, but direct electric heat is easy to make expensive when it is used for long hours or whole-home heating.",
+      "primaryWatts": 2000,
+      "defaultHours": 4,
+      "summary": "For whole-room regular heating, direct electric heating is usually expensive compared with mains gas because the electricity unit rate is much higher.",
+      "angle": "Electric heat can still make sense for short bursts, rooms without central heating, targeted comfort, or homes where installation simplicity matters.",
+      "reviewedDate": "2026-05-12",
+      "lastSubstantiveUpdate": "2026-05-12",
+      "dataSources": ["ofgem-price-cap-2026-q2"],
+      "relatedRoutes": [
+        { "href": "/running-costs/electric-heater-running-cost/", "eyebrow": "Calculator", "title": "Electric heater running cost", "text": "Put the verdict against your own use pattern." },
+        { "href": "/compare/gas-vs-electric-heating/", "eyebrow": "Compare", "title": "Gas vs electric heating", "text": "Check whole-home heating economics." },
+        { "href": "/running-costs/electric-heating-cost-per-month/", "eyebrow": "Monthly", "title": "Electric heating cost per month", "text": "Translate hourly cost into bill impact." }
+      ],
+      "faq": [
+        { "question": "Is electric heating always expensive?", "answer": "No. It can be sensible for short, targeted use. It becomes expensive when direct electric heat is used for large areas or long hours." },
+        { "question": "Why is electric heating often dearer than gas?", "answer": "The current benchmark electricity unit rate is much higher than the gas unit rate, so direct electric heat has a higher fuel cost per kWh." }
+      ]
+    },
+    {
+      "path": "/compare/electric-heater-vs-central-heating/",
+      "title": "Electric Heater vs Central Heating Cost UK | Home Energy Scout",
+      "description": "Compare electric heater and central heating cost logic in the UK, including when single-room electric heat can still make sense.",
+      "navKey": "compare",
+      "breadcrumbs": [
+        { "label": "Compare", "href": "/compare/" },
+        { "label": "Electric heater vs central heating", "href": "/compare/electric-heater-vs-central-heating/" }
+      ],
+      "contentCluster": "electric-heating",
+      "template": "electric-heating-guide",
+      "h1": "Electric heater vs central heating cost",
+      "kicker": "Heating comparison",
+      "lead": "The cheaper option depends on whether you need one room warm for a short time or a whole home warm for longer.",
+      "primaryWatts": 2000,
+      "defaultHours": 4,
+      "summary": "A plug-in electric heater can make sense for short single-room use, but central heating often wins when several rooms need heat.",
+      "angle": "Use this as decision logic before modelling your exact heater or whole-home setup.",
+      "reviewedDate": "2026-05-12",
+      "lastSubstantiveUpdate": "2026-05-12",
+      "dataSources": ["ofgem-price-cap-2026-q2"],
+      "relatedRoutes": [
+        { "href": "/compare/gas-vs-electric-heating/", "eyebrow": "System view", "title": "Gas vs electric heating", "text": "Compare fuels at the system level." },
+        { "href": "/running-costs/electric-heater-running-cost/", "eyebrow": "Calculator", "title": "Electric heater running cost", "text": "Model the plug-in heater case." },
+        { "href": "/sizing/heater-room-size-calculator/", "eyebrow": "Room fit", "title": "Heater room size calculator", "text": "Check whether a plug-in heater is realistic for the room." }
+      ],
+      "faq": [
+        { "question": "Is it cheaper to use an electric heater for one room?", "answer": "Sometimes, especially for short use when you do not need the whole home warm. For longer sessions or multiple rooms, central heating may be cheaper overall." },
+        { "question": "Should I turn off central heating and use plug-in heaters?", "answer": "Not as a blanket rule. Model the room, hours and comfort need first, because direct electric heat can become expensive quickly." }
+      ]
+    }
+  ]
+}
