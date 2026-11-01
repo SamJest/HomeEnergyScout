@@ -31,6 +31,7 @@ function walk(dir, acc = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
+      if (entry.name.startsWith(".") || ["node_modules", "test-results", "playwright-report", "docs", "tests", "codex-growth-pack"].includes(entry.name)) continue;
       walk(full, acc);
     } else if (entry.isFile() && /\.html$/i.test(entry.name)) {
       acc.push(full);
@@ -388,7 +389,7 @@ function replaceMount(text, id, markerName, innerHtml) {
 }
 
 for (const file of walk(root)) {
-  let text = fs.readFileSync(file, 'utf8');
+  let text = fs.readFileSync(file, 'utf8').replace(/\r\n?/g, '\n');
   let config = extractPageConfig(text);
   if (!config) continue;
   const filePath = pagePathFromFile(file);

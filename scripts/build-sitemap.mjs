@@ -12,6 +12,7 @@ function walk(dir, acc = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
+      if (entry.name.startsWith(".") || ["node_modules", "test-results", "playwright-report", "docs", "tests", "codex-growth-pack"].includes(entry.name)) continue;
       walk(full, acc);
     } else if (entry.isFile() && /\.html$/i.test(entry.name)) {
       acc.push(full);

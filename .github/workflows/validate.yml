@@ -1,0 +1,28 @@
+name: Static site quality
+on:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 9 * * 1'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --test tests/*.test.mjs
+      - run: node scripts/build.mjs
+      - run: node scripts/check-idempotence.mjs
+      - run: git diff --exit-code
+      - run: npm install --ignore-scripts --no-package-lock
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/browser-smoke.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-evidence
+          path: test-results/

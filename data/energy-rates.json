@@ -1,23 +1,59 @@
 {
   "currentPeriod": {
-    "id": "ofgem-price-cap-2026-q2",
-    "label": "Ofgem price cap, 1 April to 30 June 2026",
+    "id": "ofgem-price-cap-2026-q4",
+    "label": "Ofgem price cap, 1 October to 31 December 2026",
     "region": "England, Scotland and Wales average",
     "paymentMethod": "Direct Debit",
-    "validFrom": "2026-04-01",
-    "validTo": "2026-06-30",
-    "reviewDue": "2026-05-27",
-    "electricityUnitRatePence": 24.67,
-    "electricityStandingChargePencePerDay": 57.21,
-    "gasUnitRatePence": 5.74,
-    "gasStandingChargePencePerDay": 29.09,
-    "typicalDualFuelAnnualCapGbp": 1641,
-    "vatIncluded": true,
+    "validFrom": "2026-10-01",
+    "validTo": "2026-12-31",
+    "reviewDue": "2026-11-25",
+    "electricityUnitRatePence": 26.32,
+    "electricityStandingChargePencePerDay": 54.83,
+    "gasUnitRatePence": 7.97,
+    "gasStandingChargePencePerDay": 29.68,
+    "typicalDualFuelAnnualCapGbp": 1723,
     "sourceName": "Ofgem energy price cap unit rates and standing charges",
-    "sourceUrl": "https://www.ofgem.gov.uk/information-consumers/energy-advice-households/energy-price-cap-unit-rates-and-standing-charges",
+    "sourceUrl": "https://www.ofgem.gov.uk/your-energy-supply/your-energy-bill/energy-price-cap-unit-rates-and-standing-charges",
     "notes": [
-      "Rates are rounded national averages for Direct Debit customers and include VAT.",
-      "Actual unit rates and standing charges vary by region, payment method, meter type and supplier."
-    ]
-  }
+      "Rounded national Direct Debit averages for England, Scotland and Wales; not Northern Ireland.",
+      "Electricity is zero-rated for VAT in this period; gas rates include 5% VAT.",
+      "Your supplier, region, payment method and meter type affect your tariff. Fixed and multi-rate tariffs differ.",
+      "The annual cap figure is an annualised typical-consumption benchmark, not a limit on your bill."
+    ],
+    "checkedOn": "2026-11-01",
+    "tariffType": "Default single-rate tariff",
+    "electricityVat": {
+      "percent": 0,
+      "note": "Zero-rated from 1 October 2026 to 31 March 2027"
+    },
+    "gasVat": {
+      "percent": 5,
+      "included": true
+    },
+    "announcementUrl": "https://www.ofgem.gov.uk/news/changes-energy-price-cap-between-1-october-and-31-december-2026"
+  },
+  "schemaVersion": 2,
+  "history": [
+    {
+      "id": "ofgem-price-cap-2026-q2",
+      "label": "Ofgem price cap, 1 April to 30 June 2026",
+      "region": "England, Scotland and Wales average",
+      "paymentMethod": "Direct Debit",
+      "validFrom": "2026-04-01",
+      "validTo": "2026-06-30",
+      "reviewDue": "2026-05-27",
+      "electricityUnitRatePence": 24.67,
+      "electricityStandingChargePencePerDay": 57.21,
+      "gasUnitRatePence": 5.74,
+      "gasStandingChargePencePerDay": 29.09,
+      "typicalDualFuelAnnualCapGbp": 1641,
+      "vatIncluded": true,
+      "sourceName": "Ofgem energy price cap unit rates and standing charges",
+      "sourceUrl": "https://www.ofgem.gov.uk/information-consumers/energy-advice-households/energy-price-cap-unit-rates-and-standing-charges",
+      "notes": [
+        "Rates are rounded national averages for Direct Debit customers and include VAT.",
+        "Actual unit rates and standing charges vary by region, payment method, meter type and supplier."
+      ]
+    }
+  ]
 }
