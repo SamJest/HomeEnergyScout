@@ -4,7 +4,7 @@ Captured before source changes. Workspace initially contained only an unborn Git
 
 ## Inventory and dependency graph
 
-Static HTML/CSS/JS; 58 sitemap routes plus 404. Ten calculator keys: appliance, heater, dehumidifier, loft-insulation, led-lighting, old-fridge-replacement, heater-size, heating-comparison, heated-airer-vs-tumble-dryer, portable-ac-vs-fan. No package manifest, tests or CI workflow at baseline. Netlify publish-root config and CNAME exist; actual hosting provider not verified, preserve settings.
+Static HTML/CSS/JS; 56 sitemap routes plus 404 (verified against the tree; the pack estimated approximately 58). Ten calculator keys: appliance, heater, dehumidifier, loft-insulation, led-lighting, old-fridge-replacement, heater-size, heating-comparison, heated-airer-vs-tumble-dryer, portable-ac-vs-fan. No package manifest, tests or CI workflow at baseline. Netlify publish-root config and CNAME exist; actual hosting provider not verified, preserve settings.
 
 Relevant paths: data/{energy-rates,calculator-defaults,pages}.json; assets/js/site.js; assets/css/styles.css; scripts/lib/content-data.mjs; scripts/{generate-traffic-pages,sync-shared-data,prepare-static-launch,build-sitemap,validate-site}.mjs; running-costs/*/index.html; compare/*/index.html; sizing/heater-room-size-calculator/index.html; methodology/index.html.
 
@@ -31,3 +31,5 @@ Official Ofgem unit-rates page and dated Q4 announcement opened on 2026-11-01: c
 Sequence: arithmetic and stale-output tests → tariff truth and generated static answers → calculator validation/accessibility → existing-page editorial fixes → crawl audit → event privacy/CI → backlog → full regeneration and browser QA. Stop at failing correctness gates. Browser dependency absent initially; install a development-only browser test tool if possible. No measured performance or accessibility score at baseline.
 
 Rollback: review commits against base above; revert approved changes or redeploy last known good release after owner review. No merge or deployment authorised.
+
+Initial regression evidence: 9 arithmetic/rounding tests passed, 2 runtime regressions failed (30-day mismatch and >24h accepted), before either fix.
