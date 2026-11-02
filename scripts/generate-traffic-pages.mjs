@@ -4,6 +4,7 @@ import {
   costFor,
   escapeHtml,
   formatMoney,
+  formatVatTreatment,
   mergePageConfig,
   readContentData,
   root,
@@ -54,7 +55,7 @@ ${body}
 }
 
 function sourceNote() {
-  return `<p class="source-note">${source.electricityUnitRatePence}p/kWh electricity (zero VAT), ${source.gasUnitRatePence}p/kWh gas (includes 5% VAT): ${escapeHtml(source.label)}. ${escapeHtml(source.paymentMethod)} national averages for England, Scotland and Wales, not Northern Ireland. Checked ${source.checkedOn}. Your supplier, region, payment method and meter type affect your tariff. Energy-only costs exclude standing charges.</p>`;
+  return `<p class="source-note">${source.electricityUnitRatePence}p/kWh electricity (${formatVatTreatment(source.electricityVat)}), ${source.gasUnitRatePence}p/kWh gas (${formatVatTreatment(source.gasVat)}): ${escapeHtml(source.label)}. ${escapeHtml(source.paymentMethod)} national averages for England, Scotland and Wales, not Northern Ireland. Checked ${source.checkedOn}. Your supplier, region, payment method and meter type affect your tariff. Energy-only costs exclude standing charges.</p>`;
 }
 
 function sourcePanel() {
@@ -65,7 +66,7 @@ function sourcePanel() {
       <li>Electricity rate used in tables and default calculators: ${source.electricityUnitRatePence}p/kWh.</li>
       <li>Standing charges are not added to appliance-only examples because you usually pay them whether or not this heater is used.</li>
       <li>Figures are estimates, not supplier quotes or installer advice.</li>
-      <li>Checked ${source.checkedOn}. Electricity is zero-rated for VAT; gas includes 5% VAT. GB averages do not cover Northern Ireland.</li>
+      <li>Checked ${source.checkedOn}. Electricity: ${formatVatTreatment(source.electricityVat)}; gas: ${formatVatTreatment(source.gasVat)}. GB averages do not cover Northern Ireland.</li>
       <li>Standing charges: electricity ${source.electricityStandingChargePencePerDay}p/day; gas ${source.gasStandingChargePencePerDay}p/day, excluded here.</li>
       <li>Gas unit price is not delivered-heat cost: divide by boiler seasonal efficiency. Heat pumps use a different efficiency model. Equal expenditure does not imply equal comfort.</li>
     </ul>

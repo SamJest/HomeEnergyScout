@@ -2,6 +2,20 @@
 
 Implemented on `codex/growth-correctness-2026-11-01`, based on `b9637f279f9b4ee8ea195631dfdaf57ac74ff8f5` from `origin/main`. Local branch/diff only: **no push, PR, merge or deployment was performed**. Review with `git diff origin/main...HEAD`. The baseline and initially failing regression tests were committed first.
 
+## Follow-up fixes and re-review — 2 November 2026
+
+All three review findings are addressed:
+
+- **Cached code/CSS:** `scripts/lib/versioned-assets.mjs` emits SHA-256 content-fingerprinted copies. Static preparation rewrites all 57 HTML files to the current versions. Hashes and emitted bytes are stable across Windows/Linux line endings; changed source bytes change the URL. Previously published copies are retained for cached older HTML. The audit rejects stale/missing copies and references. Existing host headers are unchanged.
+- **VAT source of truth:** a shared formatter derives zero-rated/included/excluded descriptions from each fuel's VAT metadata. Both generators use it in source notes, panels and calculator scope notes. Invalid percentages or missing inclusion flags for nonzero tax now fail the gate. An isolated fixture switches electricity to included 20% VAT and gas to zero, executes both generators, and verifies that all three rendering paths follow those fields. Actual tariff facts and dates were unchanged.
+- **Analytics consistency:** the new event family uses the form's calculator key for `tool` across views, submits, results and errors. Legacy successful-result events retain historical identifiers for compatibility. Unit tests check both naming families; browser smoke verifies new result identifiers on all ten calculators.
+
+Two regression tests failed before the fixes (unversioned URLs and inconsistent event IDs). Final full unit run: **41/41 pass**, including five new regression/integration tests. The temporary fixtures are isolated and removed after checking their resolved parent directory. Final static validation passes for 57 HTML files / 56 routes, with zero audit issues. Repeat-build verification now includes emitted JS/CSS: **60 outputs unchanged byte-for-byte**, with an unchanged asset inventory. `git diff --check` passes; sitemap contents and substantive update dates did not change in this follow-up.
+
+Fresh headless Edge 156.0.4314.58 browser run: **42/42 route/viewport checks pass**, covering 320/390/1280px, all ten calculators, custom tariffs, errors/reset, keyboard focus, offline use and matching event identifiers. Evidence: [browser report](qa/review-browser-2026-11-02.json), [static audit](qa/review-static-audit-2026-11-02.json), [390px screenshot](qa/review-heater-390.png). Local PerformanceObserver samples remain unthrottled lab diagnostics; the original performance table below documents the first work cycle rather than a production comparison.
+
+Re-reviewed the source, generated output, asset retention/cache behaviour, tax rendering paths, compatibility of analytics payloads and test coverage. **No further actionable findings were identified.** Production hosting/CDN behaviour, analytics ingestion, GitHub CI execution and a human screen-reader session remain unverified as documented below. No merge or publishing action was taken.
+
 ## P0: tariff accuracy and calculator correctness
 
 - Verified Ofgem's current unit-rates page and dated Q4 announcement on 1 November. Electricity 26.32p/kWh, standing 54.83p/day, zero-rated VAT; gas 7.97p/kWh, standing 29.68p/day, includes 5% VAT. Effective 1 October–31 December 2026, national GB Direct Debit averages. The cap does not cover Northern Ireland, guarantee an individual's tariff or limit their total bill. No factual discrepancy from the pack; actual repository count is 56 indexable routes rather than its approximate 58.

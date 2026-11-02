@@ -120,6 +120,13 @@ export function formatMoney(value) {
   }).format(value);
 }
 
+export function formatVatTreatment(vat) {
+  if (!vat || !Number.isFinite(vat.percent) || vat.percent < 0 || vat.percent > 100 || (vat.percent > 0 && typeof vat.included !== 'boolean')) {
+    throw new Error('VAT requires a percentage and explicit inclusion for nonzero rates');
+  }
+  return vat.percent === 0 ? 'zero-rated for VAT' : `${vat.included ? 'includes' : 'excludes'} ${vat.percent}% VAT`;
+}
+
 export function costFor({ watts, hours = 1, days = 1, dutyCycle = 100, ratePence }) {
   return (watts / 1000) * hours * days * (dutyCycle / 100) * (ratePence / 100);
 }

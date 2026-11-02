@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import { emitVersionedAssets, rewriteAssetReferences } from './lib/versioned-assets.mjs';
 import {
   mergePageConfig,
   pagePathFromFile,
@@ -8,6 +9,7 @@ import {
 } from './lib/content-data.mjs';
 
 const root = process.cwd();
+const assetManifest = emitVersionedAssets(root);
 const baseUrl = 'https://www.homeenergyscout.co.uk';
 const { energyRates, calculatorDefaults, pageByPath } = readContentData();
 const socialImageUrl = `${baseUrl}/assets/img/social-share.png`;
@@ -419,7 +421,7 @@ for (const file of walk(root)) {
   }
   text = replaceMount(text, 'site-footer', 'static-footer', buildFooter());
 
-  fs.writeFileSync(file, text, 'utf8');
+  fs.writeFileSync(file, rewriteAssetReferences(text,assetManifest), 'utf8');
 }
 
 console.log(`Prepared ${walk(root).length} HTML files for static launch output.`);

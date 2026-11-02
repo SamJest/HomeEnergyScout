@@ -512,7 +512,7 @@
   window.dataLayer = window.dataLayer || [];
   window.homeEnergyScout = window.homeEnergyScout || {
     queue: [],
-    track(eventName, payload) {
+    track(eventName, payload, toolKey = payload?.tool) {
       // Never send entered dimensions, tariffs, costs, free text or URL queries.
       const allowed = ['tool', 'origin', 'field', 'errorCount', 'context', 'target', 'destination'];
       const safe = Object.fromEntries(Object.entries(payload || {}).filter(([key]) => allowed.includes(key)));
@@ -520,7 +520,7 @@
       this.queue.push(eventPayload);
       window.dataLayer.push(eventPayload);
       const alias = { calculator_submit: 'calculate_submit', calculator_result_view: 'result_view', calculator_validation_error: 'validation_error', internal_link_click: 'related_click' }[eventName];
-      if (alias) window.dataLayer.push({ ...eventPayload, event: alias });
+      if (alias) window.dataLayer.push({ ...eventPayload, event: alias, ...(toolKey ? { tool: toolKey } : {}) });
     }
   };
 
@@ -1578,7 +1578,7 @@
             page: pageConfig.path,
             origin,
             ...result.tracking
-          });
+          }, calculatorKey);
         }
       };
 

@@ -50,6 +50,9 @@ try {
     assert.equal(await page.locator('.form-errors').evaluate(el=>document.activeElement===el),true,`Error focus ${width} ${route}`);
     await form.locator('button[type="reset"]').click();await page.waitForTimeout(250);
     assert.equal(await panel.getAttribute('data-state'),'ready');
+    await form.locator('button[type="submit"]').click();
+    const toolKey=await form.getAttribute('data-calculator');
+    assert.equal(await page.evaluate(()=>window.dataLayer.filter(e=>e.event==='result_view').at(-1)?.tool),toolKey,'Result/view/submit tool identifiers agree');
     if(route.includes('electric-heater-running-cost')) {
      assert.ok((await panel.innerText()).includes('£63.17'));
      await form.locator('[data-preset-value="500"]').click();assert.equal(await form.locator('[name="watts"]').inputValue(),'500');

@@ -2,7 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
-import { readContentData, costFor, formatMoney } from './lib/content-data.mjs';
+import { readContentData, costFor, formatMoney, formatVatTreatment } from './lib/content-data.mjs';
+import { assetManifest, fingerprint } from './lib/versioned-assets.mjs';
 
 export function rateIssues(period, today = new Date().toISOString().slice(0,10)) {
   const issues = [];
@@ -13,7 +14,11 @@ export function rateIssues(period, today = new Date().toISOString().slice(0,10))
   if (period.checkedOn > today || period.validFrom > period.validTo) issues.push('Invalid tariff chronology');
   for (const key of ['electricityUnitRatePence','gasUnitRatePence','electricityStandingChargePencePerDay','gasStandingChargePencePerDay'])
     if (!Number.isFinite(period[key]) || period[key] <= 0) issues.push(`Invalid ${key}`);
-  if (!period.electricityVat || !period.gasVat || 'vatIncluded' in period) issues.push('Fuel-specific VAT required');
+  if ('vatIncluded' in period) issues.push('Fuel-specific VAT required');
+  for (const fuel of ['electricity','gas']) {
+    try { formatVatTreatment(period[`${fuel}Vat`]); }
+    catch { issues.push(`Invalid ${fuel} VAT metadata`); }
+  }
   return issues;
 }
 export function staleIssues(text) {
@@ -30,11 +35,17 @@ export function audit() {
   const { energyRates } = readContentData();
   const rate = energyRates.currentPeriod;
   const issues = rateIssues(rate).map(message=>({priority:'P0',file:'data/energy-rates.json',message}));
+  const assets = assetManifest();
+  for(const [source,target] of Object.entries(assets)) {
+    const file=target.slice(1);
+    if(!fs.existsSync(file) || fs.readFileSync(file,'utf8') !== fingerprint(fs.readFileSync(source.slice(1),'utf8')).bytes) issues.push({priority:'P0',file,message:'Missing or stale fingerprinted asset'});
+  }
   const seen = { title:new Set(), description:new Set(), canonical:new Set() };
   const sitemap = fs.readFileSync('sitemap.xml','utf8');
   for (const file of htmlFiles()) {
     const text = fs.readFileSync(file,'utf8');
     const add = (message,priority='P1') => issues.push({priority,file,message});
+    for(const target of Object.values(assets)) if(!text.includes(`="${target}"`)) add('Missing current fingerprinted asset reference','P0');
     staleIssues(text).forEach(x=>add(x,'P0'));
     for (const [key,re] of Object.entries({title:/<title>(.*?)<\/title>/s,description:/<meta name="description" content="([^"]+)"/,canonical:/<link rel="canonical" href="([^"]+)"/})) {
       const value = text.match(re)?.[1];
