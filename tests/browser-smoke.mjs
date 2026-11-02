@@ -4,13 +4,15 @@ import { pathToFileURL } from 'node:url';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE ? pathToFileURL(process.env.PLAYWRIGHT_MODULE).href : 'playwright');
-const server=spawn(process.execPath,['scripts/dev-server.mjs','8097'],{stdio:'pipe'});
-await new Promise((resolve,reject)=>{server.stdout.once('data',resolve);server.once('error',reject);server.once('exit',code=>reject(new Error(`Server exited ${code}`)));});
+const baseUrl=(process.env.HES_BASE_URL || 'http://127.0.0.1:8097').replace(/\/$/,'');
+const evidenceDir=process.env.HES_EVIDENCE_DIR || 'test-results';
+const server=process.env.HES_BASE_URL ? null : spawn(process.execPath,['scripts/dev-server.mjs','8097'],{stdio:'pipe'});
+if(server) await new Promise((resolve,reject)=>{server.stdout.once('data',resolve);server.once('error',reject);server.once('exit',code=>reject(new Error(`Server exited ${code}`)));});
 const browser=await chromium.launch({headless:true,...(process.env.BROWSER_PATH ? {executablePath:process.env.BROWSER_PATH} : {})});
-const report={browser:browser.version(),checks:[],metrics:[]};
-fs.mkdirSync('test-results',{recursive:true});
+const report={baseUrl,browser:browser.version(),checks:[],metrics:[]};
+fs.mkdirSync(evidenceDir,{recursive:true});
 try {
- if(fs.existsSync('test-results/baseline-location.txt')) {
+ if(!process.env.HES_BASE_URL && fs.existsSync('test-results/baseline-location.txt')) {
   const baselineRoot=fs.readFileSync('test-results/baseline-location.txt','utf8').trim();
   const baselineServer=spawn(process.execPath,[path.resolve('scripts/dev-server.mjs'),'8098'],{cwd:baselineRoot,stdio:'pipe'});
   try {
@@ -32,7 +34,7 @@ try {
     new PerformanceObserver(list=>{for(const entry of list.getEntries())if(!entry.hadRecentInput)window.qaMetrics.cls+=entry.value;}).observe({type:'layout-shift',buffered:true});
   });
   for(const route of routes) {
-   const response=await page.goto('http://127.0.0.1:8097'+route);assert.equal(response.status(),200,route);
+   const response=await page.goto(baseUrl+route);assert.equal(response.status(),200,route);
    assert.equal(await page.locator('h1').count(),1);
    assert.equal(await page.locator('input:not([type="hidden"]),select').evaluateAll(fields=>fields.filter(f=>!f.labels?.length).length),0,`Unlabelled field ${route}`);
    assert.equal(await page.locator('link[rel="canonical"]').getAttribute('href'),'https://www.homeenergyscout.co.uk'+route);
@@ -74,23 +76,23 @@ try {
      await page.evaluate(()=>document.addEventListener('click',e=>e.preventDefault(),{once:true,capture:true}));
      await page.locator('#sources a[href^="https://www.ofgem.gov.uk"]').first().click();
      assert.ok(await page.evaluate(()=>window.dataLayer.some(e=>e.event==='outbound_click')));
-     await page.locator('#calculator').screenshot({path:`test-results/heater-calculator-${width}.png`});
+     await page.locator('#calculator').screenshot({path:`${evidenceDir}/heater-calculator-${width}.png`});
     }
    }
    if(route==='/' || route.includes('electric-heater-running-cost')) {
     await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
     await page.waitForTimeout(150);
-    await page.screenshot({path:`test-results/${route==='/'?'home':'heater'}-${width}.png`});
-    report.metrics.push({width,route,...await page.evaluate(()=>window.qaMetrics),note:'Local headless browser, unthrottled; lab diagnostic, not field CWV. INP unmeasured.'});
+    await page.screenshot({path:`${evidenceDir}/${route==='/'?'home':'heater'}-${width}.png`});
+    report.metrics.push({width,route,...await page.evaluate(()=>window.qaMetrics),note:'Headless browser, unthrottled; lab diagnostic, not field CWV. INP unmeasured.'});
    }
    report.checks.push({width,route,status:'PASS'});
   }
   assert.deepEqual(errors,[]);await page.close();
  }
  const page=await browser.newPage();
- assert.equal((await page.goto('http://127.0.0.1:8097/sitemap.xml')).status(),200);
- assert.equal((await page.request.get('http://127.0.0.1:8097/robots.txt')).status(),200);
- assert.equal((await page.goto('http://127.0.0.1:8097/missing-qa-route/')).status(),404);
- fs.writeFileSync('test-results/browser-report.json',JSON.stringify(report,null,2));
+ assert.equal((await page.goto(baseUrl+'/sitemap.xml')).status(),200);
+ assert.equal((await page.request.get(baseUrl+'/robots.txt')).status(),200);
+ assert.equal((await page.goto(baseUrl+'/missing-qa-route/')).status(),404);
+ fs.writeFileSync(path.join(evidenceDir,'browser-report.json'),JSON.stringify(report,null,2));
  console.log(JSON.stringify(report,null,2));
-} finally { await browser.close();server.kill(); }
+} finally { await browser.close();server?.kill(); }

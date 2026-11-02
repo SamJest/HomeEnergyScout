@@ -1,5 +1,15 @@
 # Deployment Notes
 
+## Verified production configuration — 2 November 2026
+
+GitHub Pages serves `https://www.homeenergyscout.co.uk/` from this repository's `main` branch, root directory. This was verified through the Pages API and live `Server: GitHub.com` headers. HTTPS is enforced. The Netlify recommendation below is historical; `netlify.toml` and `_headers` are not the active deployment configuration.
+
+Publish approved changes by merging the checked branch into `main`, then wait for the GitHub Pages build/deployment to succeed and verify the actual live HTML and asset hashes. `.nojekyll` preserves the authored static output without Liquid/Jekyll processing of docs and template tokens. No domain/provider change is required.
+
+Production responses currently advertise GitHub Pages caching (observed `max-age=600` on HTML). Shared JS/CSS use content fingerprints regardless of host caching. Run `node scripts/build.mjs`, `node --test tests/*.test.mjs`, `node scripts/check-idempotence.mjs` and the browser suite before release. Verify official tariff sources again at publication; change `checkedOn` only after that check.
+
+The browser smoke suite can also inspect production: set `HES_BASE_URL=https://www.homeenergyscout.co.uk` and optionally `HES_EVIDENCE_DIR=test-results/live`, then run `node tests/browser-smoke.mjs`. This exercises client-only forms, not any outbound submission service. `node scripts/audit-live.mjs` checks all existing routes, source periods, deployed asset bytes, sitemap/robots/404 and response headers.
+
 ## Recommended host
 Netlify is the simplest first host for this project because it serves directory-style routes cleanly, respects `404.html`, and supports the included `netlify.toml` and `_headers` files without extra build tooling.
 

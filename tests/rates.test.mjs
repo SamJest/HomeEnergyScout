@@ -8,7 +8,8 @@ test('one rate resolves calculator defaults and copy tokens',()=>{
   assert.ok(!JSON.stringify(pages).includes('{{'));
 });
 test('date gate fails before/after validity, review due and malformed fields',()=>{
-  const p=readContentData().energyRates.currentPeriod;
+  // This scenario has a fixed clock; later real source checks must not change its chronology.
+  const p={...readContentData().energyRates.currentPeriod,validFrom:'2026-10-01',validTo:'2026-12-31',reviewDue:'2026-11-25',checkedOn:'2026-11-01'};
   assert.deepEqual(rateIssues(p,'2026-11-01'),[]);
   for(const d of ['2026-09-30','2026-11-26','2027-01-01'])assert.ok(rateIssues(p,d).length);
   assert.ok(rateIssues({...p,checkedOn:'bad'},'2026-11-01').length);
