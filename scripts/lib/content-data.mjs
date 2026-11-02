@@ -11,7 +11,14 @@ export function readJson(relativePath) {
 export function readContentData() {
   const energyRates = readJson('data/energy-rates.json');
   const calculatorDefaults = readJson('data/calculator-defaults.json');
-  const pageData = readJson('data/pages.json');
+  const rate = energyRates.currentPeriod.electricityUnitRatePence;
+  calculatorDefaults.defaultElectricityRatePence = rate;
+  calculatorDefaults.defaultGasRatePence = energyRates.currentPeriod.gasUnitRatePence;
+  for (const defaults of Object.values(calculatorDefaults.calculators)) defaults.tariffPence = rate;
+  const pageData = JSON.parse(JSON.stringify(readJson('data/pages.json'))
+    .replaceAll('{{rate}}', String(rate))
+    .replace(/\{\{cost:(\d+):([\d.]+):(\d+)\}\}/g, (_, watts, hours, days) =>
+      formatMoney(costFor({ watts: +watts, hours: +hours, days: +days, ratePence: rate }))));
   const pages = pageData.pages || [];
   const pageByPath = new Map(pages.map((page) => [page.path, page]));
   return { energyRates, calculatorDefaults, pages, pageByPath };
@@ -60,7 +67,7 @@ export function getSourceRecords(page, energyRates) {
       id: current.id,
       name: current.sourceName,
       url: current.sourceUrl,
-      accessed: '2026-05-12',
+      accessed: current.checkedOn,
       note: `${current.label}; electricity ${current.electricityUnitRatePence}p/kWh, gas ${current.gasUnitRatePence}p/kWh.`
     }
   };
@@ -68,7 +75,11 @@ export function getSourceRecords(page, energyRates) {
 }
 
 export function mergePageConfig(config, page, energyRates, calculatorDefaults) {
-  if (!page) return config;
+  if (!page) {
+    const key = config.calculatorKey;
+    return { ...config, energyRates: { currentPeriod: energyRates.currentPeriod },
+      ...(key && calculatorDefaults.calculators[key] ? { calculatorDefaults: { [key]: calculatorDefaults.calculators[key] } } : {}) };
+  }
   const calculatorKey = page.calculatorKey || config.calculatorKey;
   const merged = {
     ...config,
@@ -107,6 +118,13 @@ export function formatMoney(value) {
     minimumFractionDigits: value < 10 ? 2 : 2,
     maximumFractionDigits: 2
   }).format(value);
+}
+
+export function formatVatTreatment(vat) {
+  if (!vat || !Number.isFinite(vat.percent) || vat.percent < 0 || vat.percent > 100 || (vat.percent > 0 && typeof vat.included !== 'boolean')) {
+    throw new Error('VAT requires a percentage and explicit inclusion for nonzero rates');
+  }
+  return vat.percent === 0 ? 'zero-rated for VAT' : `${vat.included ? 'includes' : 'excludes'} ${vat.percent}% VAT`;
 }
 
 export function costFor({ watts, hours = 1, days = 1, dutyCycle = 100, ratePence }) {

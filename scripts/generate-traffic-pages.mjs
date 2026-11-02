@@ -4,6 +4,7 @@ import {
   costFor,
   escapeHtml,
   formatMoney,
+  formatVatTreatment,
   mergePageConfig,
   readContentData,
   root,
@@ -50,11 +51,11 @@ ${body}
   <div id="site-footer"></div>
 </body>
 </html>
-`;
+`.replace(/[ \t]+$/gm, '');
 }
 
 function sourceNote() {
-  return `<p class="source-note">Current rate used: ${source.electricityUnitRatePence}p/kWh electricity, ${source.gasUnitRatePence}p/kWh gas, based on ${escapeHtml(source.label)} for ${escapeHtml(source.paymentMethod)} customers. Your actual tariff can differ by supplier, region, payment method and meter type.</p>`;
+  return `<p class="source-note">${source.electricityUnitRatePence}p/kWh electricity (${formatVatTreatment(source.electricityVat)}), ${source.gasUnitRatePence}p/kWh gas (${formatVatTreatment(source.gasVat)}): ${escapeHtml(source.label)}. ${escapeHtml(source.paymentMethod)} national averages for England, Scotland and Wales, not Northern Ireland. Checked ${source.checkedOn}. Your supplier, region, payment method and meter type affect your tariff. Energy-only costs exclude standing charges.</p>`;
 }
 
 function sourcePanel() {
@@ -65,6 +66,9 @@ function sourcePanel() {
       <li>Electricity rate used in tables and default calculators: ${source.electricityUnitRatePence}p/kWh.</li>
       <li>Standing charges are not added to appliance-only examples because you usually pay them whether or not this heater is used.</li>
       <li>Figures are estimates, not supplier quotes or installer advice.</li>
+      <li>Checked ${source.checkedOn}. Electricity: ${formatVatTreatment(source.electricityVat)}; gas: ${formatVatTreatment(source.gasVat)}. GB averages do not cover Northern Ireland.</li>
+      <li>Standing charges: electricity ${source.electricityStandingChargePencePerDay}p/day; gas ${source.gasStandingChargePencePerDay}p/day, excluded here.</li>
+      <li>Gas unit price is not delivered-heat cost: divide by boiler seasonal efficiency. Heat pumps use a different efficiency model. Equal expenditure does not imply equal comfort.</li>
     </ul>
   </aside>`;
 }
@@ -74,10 +78,10 @@ function cost(watts, hours = 1, days = 1, dutyCycle = 100) {
 }
 
 function costTable({ caption, hoursPerDay = 4, days = 30, includeDuty = true }) {
-  const watts = [500, 1000, 1500, 2000, 2500];
+  const watts = [400, 500, 1000, 1500, 2000, 2500];
   return `<div class="table-wrap cost-table-wrap">
     <table class="comparison-table">
-      <caption>${escapeHtml(caption)}</caption>
+      <caption>${escapeHtml(caption)} — ${escapeHtml(source.label)}, energy only</caption>
       <thead>
         <tr>
           <th>Heater size</th>
@@ -85,17 +89,17 @@ function costTable({ caption, hoursPerDay = 4, days = 30, includeDuty = true }) 
           <th>${hoursPerDay} hours</th>
           <th>7 days at ${hoursPerDay}h/day</th>
           <th>30 days at ${hoursPerDay}h/day</th>
-          ${includeDuty ? '<th>30 days at 65% average output</th>' : ''}
+          ${includeDuty ? '<th>30 days at illustrative 65% output</th>' : ''}
         </tr>
       </thead>
       <tbody>
         ${watts.map((watt) => `<tr>
-          <td>${watt >= 1000 ? `${watt / 1000}kW` : `${watt}W`}</td>
-          <td>${formatMoney(cost(watt))}</td>
-          <td>${formatMoney(cost(watt, hoursPerDay))}</td>
-          <td>${formatMoney(cost(watt, hoursPerDay, 7))}</td>
-          <td>${formatMoney(cost(watt, hoursPerDay, days))}</td>
-          ${includeDuty ? `<td>${formatMoney(cost(watt, hoursPerDay, days, 65))}</td>` : ''}
+          <td data-label="Heater size">${watt >= 1000 ? `${watt / 1000}kW` : `${watt}W`}</td>
+          <td data-label="Per hour">${formatMoney(cost(watt))}</td>
+          <td data-label="${hoursPerDay} hours">${formatMoney(cost(watt, hoursPerDay))}</td>
+          <td data-label="7 days at ${hoursPerDay}h/day">${formatMoney(cost(watt, hoursPerDay, 7))}</td>
+          <td data-label="30 days at ${hoursPerDay}h/day">${formatMoney(cost(watt, hoursPerDay, days))}</td>
+          ${includeDuty ? `<td data-label="30 days at illustrative 65%">${formatMoney(cost(watt, hoursPerDay, days, 65))}</td>` : ''}
         </tr>`).join('')}
       </tbody>
     </table>
@@ -165,7 +169,8 @@ function flagshipPage(page) {
           <p class="lead">Work out what an electric heater costs per hour, per day, per week or per month in a UK home using current electricity assumptions and your own use pattern.</p>
           <div class="answer-summary answer-summary--strong">
             <strong>Quick answer</strong>
-            <p>A 2kW electric heater costs about ${twoKwHour} per hour at full power using ${rate}p/kWh electricity. Four hours costs about ${twoKwFourHours}; four hours every day for 30 days costs about ${twoKwMonth} at full power, or about ${twoKwMonthDuty} at 65% average output.</p>
+            <p>A 2kW electric heater costs about ${twoKwHour} per hour at full power using ${rate}p/kWh electricity. Four hours costs about ${twoKwFourHours}; four hours every day for 30 days costs about ${twoKwMonth} at full power, or about ${twoKwMonthDuty} with an illustrative 65% average output. Energy only; standing charges excluded.</p>
+            ${sourceNote()}
           </div>
           <div class="page-meta">
             <span>Last reviewed: ${page.reviewedDate}</span>
@@ -183,34 +188,23 @@ function flagshipPage(page) {
       </div>
     </section>
 
-    <section class="page-section" id="cost-table">
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <h2>Electric heater running cost table</h2>
-            <p>Use this as the fast full-power benchmark before adjusting for thermostat cycling, room size or your own tariff.</p>
-          </div>
-        </div>
-        ${costTable({ caption: `Electric heater costs at ${rate}p/kWh electricity`, hoursPerDay: 4 })}
-        ${sourceNote()}
-      </div>
-    </section>
-
     <section class="page-section" id="calculator">
       <div class="container calculator-stack">
         <article class="form-panel">
           <h2>Enter your heater details</h2>
           <p class="form-intro">Use this when the table is too blunt. The duty-cycle input lets you model a thermostat-controlled heater that does not stay at full power all evening.</p>
-          <div class="form-tip"><strong>What duty cycle means</strong><p>100% means the heater stays at full power. 65% means it averages roughly two thirds of full output across the time entered.</p></div>
+          <div class="form-tip"><strong>What duty cycle means</strong><p>100% means full power throughout. 65% is an illustration, not a measured default for all heaters. Start at 100% when unknown.</p></div>
           <form data-calculator="heater" data-results-target="heater-results" novalidate>
             <fieldset class="form-section">
               <legend>Heater and room use</legend>
+              <div class="preset-row" role="group" aria-label="Wattage presets">${[400,500,1000,1500,2000].map(w => `<button type="button" class="button-secondary" data-preset-field="watts" data-preset-value="${w}">${w}W</button>`).join('')}<button type="button" class="button-secondary" data-preset-field="watts">Custom wattage</button></div>
+              <div class="preset-row" role="group" aria-label="Daily runtime presets">${[1,2,4,8].map(h => `<button type="button" class="button-secondary" data-preset-field="hoursPerDay" data-preset-value="${h}">${h}h/day</button>`).join('')}</div>
               <div class="form-grid">
                 <div class="field"><label for="heaterType">Heater type</label><select id="heaterType" name="heaterType"><option>Fan heater</option><option>Oil-filled radiator</option><option>Panel heater</option><option>Infrared heater</option><option>Other electric heater</option></select></div>
-                <div class="field"><label for="watts">Power rating (watts)</label><input id="watts" name="watts" type="number" min="200" step="50" value="${defaults.watts}"></div>
-                <div class="field"><label for="hoursPerDay">Hours used per day</label><input id="hoursPerDay" name="hoursPerDay" type="number" min="0.5" step="0.5" value="${defaults.hoursPerDay}"></div>
+                <div class="field"><label for="watts">Power rating (watts)</label><input id="watts" name="watts" type="number" inputmode="decimal" min="1" max="100000" step="1" value="${defaults.watts}"></div>
+                <div class="field"><label for="hoursPerDay">Hours used per day</label><input id="hoursPerDay" name="hoursPerDay" type="number" inputmode="decimal" min="0.01" max="24" step="0.5" value="${defaults.hoursPerDay}"></div>
                 <div class="field"><label for="daysPerWeek">Days used per week</label><input id="daysPerWeek" name="daysPerWeek" type="number" min="1" max="7" step="1" value="${defaults.daysPerWeek}"></div>
-                <div class="field"><label for="dutyCycle">Average output while in use (%)</label><input id="dutyCycle" name="dutyCycle" type="number" min="10" max="100" step="5" value="${defaults.dutyCycle}"></div>
+                <div class="field"><label for="dutyCycle">Average output while in use (%)</label><input id="dutyCycle" name="dutyCycle" type="number" min="1" max="100" step="1" value="${defaults.dutyCycle}"></div>
                 <div class="field"><label for="tariffPence">Electricity rate (p/kWh)</label><input id="tariffPence" name="tariffPence" type="number" min="1" step="0.01" value="${defaults.tariffPence}"></div>
               </div>
             </fieldset>
@@ -226,23 +220,38 @@ function flagshipPage(page) {
       </div>
     </section>
 
+    <section class="page-section" id="cost-table">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Electric heater running cost table</h2>
+            <p>Use this as the fast full-power benchmark before adjusting for thermostat cycling, room size or your own tariff.</p>
+          </div>
+        </div>
+        ${costTable({ caption: `Electric heater costs at ${rate}p/kWh electricity`, hoursPerDay: 4 })}
+        ${sourceNote()}
+      </div>
+    </section>
+
     <section class="page-section" id="exact-answers">
       <div class="container page-grid">
         <div>
           <div class="section-head">
             <div>
-              <h2>Exact electric-heating answers people usually search for</h2>
-              <p>These are intentionally direct because most heater-cost questions need the number first and the caveats second.</p>
+              <h2>Common wattage and runtime questions</h2>
+              <p>Full-power energy costs using the dated benchmark above.</p>
             </div>
           </div>
           <div class="tool-highlight-grid">
+            <article class="tool-highlight"><strong>400W or 500W for one hour?</strong><p>400W: ${formatMoney(cost(400))}; 500W: ${formatMoney(cost(500))}. Lower power may provide less heat.</p></article>
+            <article class="tool-highlight"><strong>2kW for 2, 8 or 24 hours?</strong><p>2 hours: ${formatMoney(cost(2000,2))}; 8 hours: ${formatMoney(cost(2000,8))}; 24 hours: ${formatMoney(cost(2000,24))}. The 24-hour figure is arithmetic, not a recommendation to leave a portable heater unattended.</p></article>
             <article class="tool-highlight"><strong>How much does a 2kW heater cost per hour?</strong><p>About ${twoKwHour} per hour at full power with ${rate}p/kWh electricity.</p></article>
             <article class="tool-highlight"><strong>How much does a 2kW heater cost for four hours?</strong><p>About ${twoKwFourHours} at full power, before any thermostat cycling is allowed for.</p></article>
             <article class="tool-highlight"><strong>How much does electric heating cost per month?</strong><p>A 2kW heater used four hours daily costs about ${twoKwMonth} over 30 days at full power.</p></article>
             <article class="tool-highlight"><strong>Is electric heating expensive?</strong><p>It can be for regular room or whole-home heat because electricity costs ${rate}p/kWh versus ${gasRate}p/kWh gas on the current benchmark.</p></article>
           </div>
         </div>
-        ${sourcePanel()}
+        <aside class="assumption-panel"><h2>What changes the cost?</h2><p>The rate, wattage, hours and actual thermostat runtime determine electricity use. 65% is an illustration only. See the dated source section below.</p></aside>
       </div>
     </section>
 
@@ -322,6 +331,8 @@ function guidePage(page) {
         <article class="quick-answer">
           <h2>The practical answer</h2>
           <p>${escapeHtml(page.angle)}</p>
+          ${page.path.includes('2kw-heater-cost-per-hour') ? `<h2>2kW at full power: 1 to 24 hours</h2><ul>${[1,2,4,8,24].map(h => `<li>${h} ${h === 1 ? 'hour' : 'hours'}: ${formatMoney(cost(2000,h))} (${2*h}kWh)</li>`).join('')}</ul><p>24 hours is a mathematical upper-use example, not advice to leave a portable heater unattended. Follow the appliance instructions. <a href="/running-costs/electric-heater-running-cost/#calculator">Adjust wattage, hours and tariff in the calculator</a>.</p>` : ''}
+          ${page.path.includes('electric-heating-cost-per-month') ? `<h2>Budget for your schedule and heater count</h2><p>The figures below model one heater, not a whole home. At 2kW for 4 hours every day, one heater uses 240kWh in 30 days (${formatMoney(cost(2000,4,30))}); two identical heaters use 480kWh (${formatMoney(cost(2000,4,30)*2)}). Add each heater separately if ratings or schedules differ.</p><p>For five days per week, a 30-day estimate uses 30/7 weeks: ${formatMoney(cost(2000,4,30)*5/7)} for one heater. Calendar months and holidays differ. Standing charges and other household appliances are additional. <a href="/running-costs/electric-heater-running-cost/#calculator">Use the calculator for a weekly schedule</a>.</p>` : ''}
           <div class="kpi-strip">
             <div class="kpi-chip"><strong>${primaryHour}</strong><span>${sizeLabel} per hour</span></div>
             <div class="kpi-chip"><strong>${sessionCost}</strong><span>${page.defaultHours} hours at full power</span></div>
@@ -338,7 +349,7 @@ function guidePage(page) {
         <div class="section-head">
           <div>
             <h2>Running cost table</h2>
-            <p>The full-power column is the clean benchmark. The 65% column is a more realistic starting point for a thermostat-controlled heater in a warmed-up room.</p>
+            <p>The full-power column is the benchmark. The 65% column is an illustration, not a prediction of thermostat behaviour. Actual output depends on heat loss, settings and weather.</p>
           </div>
         </div>
         ${costTable({ caption: `Electric heating examples at ${rate}p/kWh`, hoursPerDay: page.defaultHours })}

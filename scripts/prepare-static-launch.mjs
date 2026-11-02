@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import { emitVersionedAssets, rewriteAssetReferences } from './lib/versioned-assets.mjs';
 import {
   mergePageConfig,
   pagePathFromFile,
@@ -8,6 +9,7 @@ import {
 } from './lib/content-data.mjs';
 
 const root = process.cwd();
+const assetManifest = emitVersionedAssets(root);
 const baseUrl = 'https://www.homeenergyscout.co.uk';
 const { energyRates, calculatorDefaults, pageByPath } = readContentData();
 const socialImageUrl = `${baseUrl}/assets/img/social-share.png`;
@@ -31,6 +33,7 @@ function walk(dir, acc = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
+      if (entry.name.startsWith(".") || ["node_modules", "test-results", "playwright-report", "docs", "tests", "codex-growth-pack"].includes(entry.name)) continue;
       walk(full, acc);
     } else if (entry.isFile() && /\.html$/i.test(entry.name)) {
       acc.push(full);
@@ -388,7 +391,7 @@ function replaceMount(text, id, markerName, innerHtml) {
 }
 
 for (const file of walk(root)) {
-  let text = fs.readFileSync(file, 'utf8');
+  let text = fs.readFileSync(file, 'utf8').replace(/\r\n?/g, '\n');
   let config = extractPageConfig(text);
   if (!config) continue;
   const filePath = pagePathFromFile(file);
@@ -418,7 +421,7 @@ for (const file of walk(root)) {
   }
   text = replaceMount(text, 'site-footer', 'static-footer', buildFooter());
 
-  fs.writeFileSync(file, text, 'utf8');
+  fs.writeFileSync(file, rewriteAssetReferences(text,assetManifest), 'utf8');
 }
 
 console.log(`Prepared ${walk(root).length} HTML files for static launch output.`);

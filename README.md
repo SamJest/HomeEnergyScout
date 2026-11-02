@@ -1,5 +1,13 @@
 # Home Energy Scout
 
+## Growth maintenance workflow (1 November 2026)
+
+The growth branch preserves the static site and existing URLs. Tariff facts live in `data/energy-rates.json`; calculator rates and generated examples are derived from it. The older Batch 15 notes below are historical context.
+
+Run `node --test tests/*.test.mjs`, `node scripts/build.mjs` and `node scripts/check-idempotence.mjs`. The build regenerates the ten existing template pages before syncing other static examples, metadata and sitemap; edit their templates/data rather than only their HTML. It fails on expired rates or a missed source review. It does not publish.
+
+See [rate update and review runbook](docs/RATE_UPDATE_RUNBOOK.md), [baseline](docs/GROWTH_BASELINE_2026-11-01.md), [change report](docs/HES_GROWTH_CHANGELOG.md), [event schema](docs/EVENT_TRACKING.md) and [90-day backlog](docs/GROWTH_EXPERIMENT_BACKLOG.md). Optional Playwright browser tests use a development dependency only; see the runbook for setup.
+
 Home Energy Scout is a UK-first static utility site focused on household energy running costs, savings, room sizing and practical comparison decisions.
 
 ## Project status

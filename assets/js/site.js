@@ -512,13 +512,15 @@
   window.dataLayer = window.dataLayer || [];
   window.homeEnergyScout = window.homeEnergyScout || {
     queue: [],
-    track(eventName, payload) {
-      const eventPayload = { event: eventName, page: pageConfig.path, ...payload, timestamp: new Date().toISOString() };
+    track(eventName, payload, toolKey = payload?.tool) {
+      // Never send entered dimensions, tariffs, costs, free text or URL queries.
+      const allowed = ['tool', 'origin', 'field', 'errorCount', 'context', 'target', 'destination'];
+      const safe = Object.fromEntries(Object.entries(payload || {}).filter(([key]) => allowed.includes(key)));
+      const eventPayload = { event: eventName, page: pageConfig.path, ...safe, timestamp: new Date().toISOString() };
       this.queue.push(eventPayload);
       window.dataLayer.push(eventPayload);
-      if (window.console && typeof window.console.debug === 'function') {
-        console.debug('[Home Energy Scout event]', eventName, payload);
-      }
+      const alias = { calculator_submit: 'calculate_submit', calculator_result_view: 'result_view', calculator_validation_error: 'validation_error', internal_link_click: 'related_click' }[eventName];
+      if (alias) window.dataLayer.push({ ...eventPayload, event: alias, ...(toolKey ? { tool: toolKey } : {}) });
     }
   };
 
@@ -575,18 +577,13 @@
   }
 
   function addInternalLinkTracking() {
-    document.querySelectorAll('a[data-track-link]').forEach((link) =>
-      link.addEventListener('click', () =>
-        window.homeEnergyScout.track('internal_link_click', {
-          target: link.getAttribute('href'),
-          label: link.textContent.trim(),
-          context: getLinkContext(link),
-          sectionHeading: getLinkSectionHeading(link),
-          position: getLinkPosition(link),
-          page: pageConfig.path
-        })
-      )
-    );
+    document.addEventListener('click', event => {
+      const link = event.target.closest('a[data-track-link]');
+      if (!link) return;
+      const url = new URL(link.href, window.location.href);
+      if (url.origin !== window.location.origin) return;
+      window.homeEnergyScout.track('internal_link_click', { target: url.pathname, context: getLinkContext(link) });
+    });
   }
 
   function addAdSlotTracking() {
@@ -624,9 +621,9 @@
   function readNumber(form, name) {
     const field = form.querySelector(`[name="${name}"]`);
     const raw = field?.value ?? '';
-    if (raw === '') return 0;
+    if (String(raw).trim() === '') return NaN;
     const value = Number(raw);
-    return Number.isFinite(value) ? value : 0;
+    return Number.isFinite(value) ? value : NaN;
   }
 
   function formatValue(value, suffix = '') {
@@ -644,18 +641,24 @@
   }
 
   function clearFieldErrors(form) {
+    form.querySelectorAll('[data-error-id]').forEach((field) => {
+      const ids = (field.getAttribute('aria-describedby') || '').split(' ').filter(id => id && id !== field.dataset.errorId);
+      if (ids.length) field.setAttribute('aria-describedby', ids.join(' '));
+      else field.removeAttribute('aria-describedby');
+      delete field.dataset.errorId;
+    });
     form.querySelectorAll('.field-error').forEach((node) => node.remove());
     form.querySelectorAll('.field.has-error').forEach((node) => node.classList.remove('has-error'));
     const summary = form.querySelector('.form-errors');
     if (summary) summary.remove();
   }
 
-  function applyFieldErrors(form, errors) {
+  function applyFieldErrors(form, errors, announce = true) {
     clearFieldErrors(form);
     if (!errors.length) return null;
     const summary = document.createElement('div');
     summary.className = 'form-errors';
-    summary.setAttribute('role', 'alert');
+    if (announce) summary.setAttribute('role', 'alert');
     summary.tabIndex = -1;
     summary.innerHTML = `<strong>Check these inputs:</strong><ul>${errors.map((error) => `<li>${escapeHtml(error.message)}</li>`).join('')}</ul>`;
     form.prepend(summary);
@@ -666,9 +669,12 @@
       if (wrapper) wrapper.classList.add('has-error');
       const hint = document.createElement('p');
       hint.className = 'field-error';
+      hint.id = `${field.id || field.name}-error`;
       hint.textContent = error.message;
       field.insertAdjacentElement('afterend', hint);
       field.setAttribute('aria-invalid', 'true');
+      field.dataset.errorId = hint.id;
+      field.setAttribute('aria-describedby', [field.getAttribute('aria-describedby'), hint.id].filter(Boolean).join(' '));
     });
     return summary;
   }
@@ -798,14 +804,14 @@
     const hoursPerDay = readNumber(form, 'hoursPerDay');
     const daysPerWeek = readNumber(form, 'daysPerWeek');
     const tariff = readNumber(form, 'tariffPence') / 100;
-    const dutyCycle = Math.max(0.1, Math.min(1, readNumber(form, 'dutyCycle') / 100));
+    const dutyCycle = readNumber(form, 'dutyCycle') / 100;
     const heaterType = form.querySelector('[name="heaterType"]')?.value || 'Electric heater';
 
     const fullPowerDailyCost = (watts / 1000) * hoursPerDay * tariff;
     const dailyCost = fullPowerDailyCost * dutyCycle;
     const weeklyCost = dailyCost * daysPerWeek;
     const annualCost = weeklyCost * 52;
-    const monthlyCost = annualCost / 12;
+    const monthlyCost = weeklyCost / 7 * 30;
 
     let scenario = 'For steady all-evening use, electric heating costs add up quickly.';
     if (dutyCycle <= 0.55) {
@@ -819,10 +825,10 @@
       stats: [
         ['Daily estimate', formatCurrency(dailyCost)],
         ['Weekly estimate', formatCurrency(weeklyCost)],
-        ['Monthly estimate', formatCurrency(monthlyCost)],
+        ['30-day estimate (weekly schedule)', formatCurrency(monthlyCost)],
         ['Flat-out cost per day', formatCurrency(fullPowerDailyCost)]
       ],
-      interpretation: `${heaterType} uses electricity at the same cost per kWh as any other electric resistance heater. The main difference is how long it stays near full power and how well it suits the room. ${scenario}`,
+      interpretation: `${heaterType} uses electricity at the same cost per kWh as any other electric resistance heater. The main difference is how long it stays near full power and how well it suits the room. ${scenario} Annual use assumes this weekly schedule for 52 weeks; seasonal heating will differ.`,
       assumptions: [
         `Tariff used: ${formatValue(readNumber(form, 'tariffPence'), 'p/kWh')}`,
         `Usage pattern: ${formatValue(hoursPerDay, ' hours a day')} for ${formatValue(daysPerWeek, ' days a week')}`,
@@ -837,7 +843,7 @@
         createRoute('/compare/heating-option-comparison/', 'Compare heater types', 'Use the same room and usage pattern to see which heating style is likely to suit better.', 'Compare options'),
         createRoute('/compare/oil-radiator-vs-fan-heater/', 'Read a focused heater verdict', 'Move to a narrower comparison when the shortlist is already down to common room-heating options.', 'Get a verdict')
       ],
-      note: `This result uses a ${Math.round(dutyCycle * 100)}% average output factor. At 100%, the heater would cost ${formatCurrency(fullPowerDailyCost)} per day for the same hours.`,
+      note: `Energy only; standing charges excluded. This result uses a user-selected ${formatNumber(dutyCycle * 100, 1)}% average output, not a measured thermostat prediction. A 30-day estimate uses 30/7 weeks of your schedule. Daily use is ${(watts / 1000 * hoursPerDay * dutyCycle).toFixed(2)} kWh. At full power the same hours cost ${formatCurrency(fullPowerDailyCost)} per day.`,
       tracking: {
         tool: 'electric_heater_running_cost',
         annualCost: Number(annualCost.toFixed(2)),
@@ -863,7 +869,7 @@
 
     let interpretation = 'For general damp control, a mid-size compressor dehumidifier often lands in the low-to-middle running-cost range compared with direct electric heating.';
     if (targetMode === 'laundry') {
-      interpretation = 'For drying clothes indoors, a dehumidifier is often cheaper to run than adding extra electric heat, but it may take longer than a tumble dryer and works best in a closed room.';
+      interpretation = 'For laundry drying, compare measured kWh per completed load at the same dryness. A lower hourly wattage alone does not prove a lower total cost. Heat, ventilation and moisture removal do different jobs.';
     } else if (targetMode === 'persistent-damp') {
       interpretation = 'If the unit needs to run for long stretches because the room stays cold or damp, the yearly cost becomes noticeable and it is worth checking whether ventilation, insulation or heating patterns are part of the problem.';
     }
@@ -1169,109 +1175,24 @@
   }
 
   function heatingComparisonCalculator(form) {
-    const optionA = form.querySelector('[name="optionA"]')?.value || 'fan';
-    const optionB = form.querySelector('[name="optionB"]')?.value || 'oil';
-    const roomArea = readNumber(form, 'roomArea');
-    const hoursPerDay = readNumber(form, 'hoursPerDay');
-    const daysPerWeek = readNumber(form, 'daysPerWeek');
-    const tariff = readNumber(form, 'tariffPence') / 100;
-    const useCase = form.querySelector('[name="useCase"]')?.value || 'steady';
-
-    const presets = {
-      fan: {
-        label: 'Fan heater',
-        watts: 2000,
-        coverage: 18,
-        baseDuty: { quick: 0.65, steady: 0.82, occasional: 0.45 },
-        note: 'Fast warm-up, but usually less pleasant for longer steady heating.'
-      },
-      oil: {
-        label: 'Oil-filled radiator',
-        watts: 1500,
-        coverage: 15,
-        baseDuty: { quick: 0.8, steady: 0.58, occasional: 0.5 },
-        note: 'Better fit for steadier use once the room is up to temperature.'
-      },
-      panel: {
-        label: 'Panel heater',
-        watts: 1500,
-        coverage: 15,
-        baseDuty: { quick: 0.78, steady: 0.63, occasional: 0.52 },
-        note: 'Simple direct room heat, often chosen for fixed daily heating rather than spot heat.'
-      },
-      infrared: {
-        label: 'Infrared heater',
-        watts: 1200,
-        coverage: 10,
-        baseDuty: { quick: 0.48, steady: 0.5, occasional: 0.32 },
-        note: 'Best for spot heat where you want to warm people or a small zone rather than the whole room.'
-      }
-    };
-
-    function evaluate(key) {
-      const preset = presets[key];
-      const roomLoad = Math.max(0.8, Math.min(1.25, roomArea / preset.coverage));
-      const duty = Math.max(0.25, Math.min(1, preset.baseDuty[useCase] * roomLoad));
-      const dailyCost = (preset.watts / 1000) * hoursPerDay * tariff * duty;
-      const annualCost = dailyCost * daysPerWeek * 52;
-      return { ...preset, duty, dailyCost, annualCost };
-    }
-
-    const a = evaluate(optionA);
-    const b = evaluate(optionB);
-    const cheaper = a.annualCost <= b.annualCost ? a : b;
-    const dearer = cheaper === a ? b : a;
-    const diff = Math.abs(a.annualCost - b.annualCost);
-    const diffPct = dearer.annualCost > 0 ? diff / dearer.annualCost : 0;
-    const focusedPairRoutes = {
-      'fan-oil': createRoute('/compare/oil-radiator-vs-fan-heater/', 'Read the oil radiator vs fan heater verdict', 'Use a narrower comparison page when those are the two realistic options.', 'Read the focused page'),
-      'oil-panel': createRoute('/compare/panel-heater-vs-oil-radiator/', 'Read the panel heater vs oil radiator verdict', 'Useful when the shortlist is down to these steadier room-heating styles.', 'Read the focused page')
-    };
-    const pairKey = [optionA, optionB].sort().join('-');
-    const focusedPairRoute = focusedPairRoutes[pairKey];
-
-    let verdict = `${cheaper.label} comes out cheaper by about ${formatCurrency(diff)} a year for this room and usage pattern.`;
-    if (diffPct < 0.1) {
-      verdict = `There is only a small cost gap here. For this room and usage pattern, comfort, controls and how you use the heater may matter more than the headline running-cost difference.`;
-    }
-
-    let interpretation = `${a.label}: ${a.note} ${b.label}: ${b.note}`;
-    if (roomArea > 18 && (optionA === 'fan' || optionB === 'fan')) {
-      interpretation += ' In a larger room, a fan heater often looks less attractive for longer steady heating because it tends to spend more time near full power and can feel harsher to sit with.';
-    }
-    if (useCase === 'occasional' && (optionA === 'infrared' || optionB === 'infrared')) {
-      interpretation += ' Infrared often looks best when you only need short bursts of local heat rather than full-room comfort.';
-    }
-
+    const labels = { fan: 'Fan heater', oil: 'Oil-filled radiator', panel: 'Panel heater', infrared: 'Infrared heater' };
+    const a = labels[form.querySelector('[name="optionA"]')?.value] || 'Option A';
+    const b = labels[form.querySelector('[name="optionB"]')?.value] || 'Option B';
+    const watts = readNumber(form, 'watts');
+    const duty = readNumber(form, 'dutyCycle') / 100;
+    const hours = readNumber(form, 'hoursPerDay');
+    const days = readNumber(form, 'daysPerWeek');
+    const rate = readNumber(form, 'tariffPence') / 100;
+    const dailyKwh = watts / 1000 * duty * hours;
+    const annualCost = dailyKwh * rate * days * 52;
     return {
-      answer: verdict,
-      stats: [
-        [`${a.label} annual cost`, formatCurrency(a.annualCost)],
-        [`${b.label} annual cost`, formatCurrency(b.annualCost)],
-        ['Cheaper option', cheaper.label],
-        ['Typical cost gap', formatCurrency(diff)]
-      ],
-      interpretation,
-      assumptions: [
-        `Room area entered: ${formatValue(roomArea, 'm2')}`,
-        `Usage pattern: ${formatValue(hoursPerDay, ' hours a day')} for ${formatValue(daysPerWeek, ' days a week')}`,
-        `Use case selected: ${useCase}`
-      ],
-      nextSteps: [
-        'If the gap is small, size and comfort usually matter more than chasing the cheapest-looking annual number.',
-        'Use the room-size tool first when you are not sure both heater types are actually suitable for the space.'
-      ],
-      nextRoutes: [
-        createRoute('/sizing/heater-room-size-calculator/', 'Check room fit before deciding', 'Make sure both heater types are genuinely suitable for the space before trusting the verdict.', 'Check the fit'),
-        createRoute('/running-costs/electric-heater-running-cost/', 'Cost the likely winner directly', 'Use a single-heater running-cost check once you know which option you are leaning towards.', 'Cost the winner'),
-        focusedPairRoute || createRoute('/guides/electric-heating-costs-explained/', 'Read the electric heating guide', 'Use the guide when the maths is clear but the practical verdict still feels unintuitive.', 'Add context')
-      ],
-      note: 'This comparison uses typical wattages and usage-pattern duty-cycle assumptions. All direct electric heaters pay the same price per kWh; the main difference is how long they stay near full output and whether they suit the room and use case.',
-      tracking: {
-        tool: 'heating_option_comparison',
-        cheaperOption: cheaper.label,
-        annualGap: Number(diff.toFixed(2))
-      }
+      answer: 'At the same rated power and average output, both options use the same electricity. Comfort and suitability still differ.',
+      stats: [[a + ' annual scenario', formatCurrency(annualCost)], [b + ' annual scenario', formatCurrency(annualCost)], ['Daily use (each)', formatNumber(dailyKwh,2) + ' kWh'], ['Output assumption', formatNumber(duty*100,1) + '%']],
+      assumptions: [watts + 'W for both options, ' + hours + ' hours/day, ' + days + ' days/week', 'User-selected average output; no heater-type efficiency or thermostat prediction', 'Tariff: ' + (rate*100) + 'p/kWh; energy only, standing charges excluded'],
+      interpretation: 'This is an equal-input comparison for direct resistance heaters, not a prediction of identical comfort. Radiant spot heat, airflow, warm-up time, controls and room heat loss change the service you receive. For different wattages or measured runtimes, cost each option separately in the heater calculator.',
+      nextRoutes: [createRoute('/running-costs/electric-heater-running-cost/', 'Cost a different wattage or schedule', 'Enter each option using its own measured inputs.'), createRoute('/sizing/heater-room-size-calculator/', 'Check room sizing', 'Use a rough sizing check before choosing equipment.')],
+      note: 'Annual scenario assumes this weekly schedule for 52 weeks; seasonal use will differ. Heat pumps and gas boilers are outside this direct-electric comparison.',
+      tracking: {tool:'heating_option_comparison'}
     };
   }
 
@@ -1297,7 +1218,7 @@
       verdict += ' That is a meaningful gap, so the cheaper option is likely to feel different on the bill over a full year.';
     }
 
-    let interpretation = 'A heated airer usually wins on direct cost per load, but it trades away speed, throughput and convenience.';
+    let interpretation = 'The cost result depends on your entered kWh and hours for the same completed load. Include any extra room heating or moisture-control electricity. Speed and convenience also differ.';
     if (laundryPressure === 'low') {
       interpretation = 'For a lighter household laundry routine, the heated airer often looks good because the slower drying time is easier to live with.';
     } else if (laundryPressure === 'high') {
@@ -1542,6 +1463,31 @@
     }
   };
 
+  // Apply the same finite-number and practical upper-bound policy to every tool.
+  const numericBounds = {
+    watts:[1,100000], tariffPence:[0.01,1000], hoursPerDay:[0.01,24], daysPerWeek:[1,7], dutyCycle:[1,100],
+    standbyWatts:[0,10000], standbyHoursPerDay:[0,24], minutesPerUse:[0.01,1440], usesPerWeek:[0,1000],
+    roomLength:[0.1,50], roomWidth:[0.1,50], roomArea:[0.1,2500], ceilingHeight:[2,4],
+    airerHoursPerLoad:[0.01,24], fanHoursPerDay:[0.01,24], acHoursPerDay:[0.01,24],
+    airerWatts:[1,10000], fanWatts:[1,10000], acWatts:[1,100000], loadsPerWeek:[0.01,21],
+    tumbleKwhPerLoad:[0.01,100], hotDaysPerYear:[1,180], extractionLitres:[0,1000],
+    annualHeatingCost:[0.01,1000000], currentDepth:[0,1000], upgradeCost:[0.01,1000000],
+    bulbCount:[1,10000], oldWatts:[0.01,10000], ledWatts:[0.01,10000], replacementCost:[0,1000000], replacementKwh:[0.01,100000]
+  };
+  for (const key of Object.keys(validators)) {
+    const original = validators[key];
+    validators[key] = form => {
+      const errors = [];
+      form.querySelectorAll('input[type="number"]').forEach(field => {
+        const value = readNumber(form, field.name);
+        const [min,max] = numericBounds[field.name] || [0,1000000];
+        if (!Number.isFinite(value) || value < min || value > max) errors.push({field:field.name,message:`Enter ${field.name.replace(/([A-Z])/g,' $1').toLowerCase()} between ${min} and ${max}.`});
+      });
+      if (errors.length) return errors;
+      return original(form);
+    };
+  }
+
   const calculators = {
     appliance: applianceCalculator,
     heater: heaterCalculator,
@@ -1582,6 +1528,20 @@
       const panel = document.getElementById(form.dataset.resultsTarget);
       if (!calculator || !panel) return;
       applyCalculatorDefaults(form, calculatorKey);
+      form.querySelectorAll('input[type="number"]').forEach(field => {
+        const bounds = numericBounds[field.name];
+        if (bounds) { field.min = bounds[0]; field.max = bounds[1]; }
+        field.setAttribute('inputmode', 'decimal');
+      });
+      if ('IntersectionObserver' in window) {
+        const viewObserver = new IntersectionObserver(entries => {
+          if (entries.some(entry => entry.isIntersecting)) {
+            window.homeEnergyScout.track('calculator_view', { tool: calculatorKey });
+            viewObserver.disconnect();
+          }
+        });
+        viewObserver.observe(form);
+      } else window.homeEnergyScout.track('calculator_view', { tool: calculatorKey });
       panel.setAttribute('role', 'status');
       panel.setAttribute('aria-live', 'polite');
       panel.setAttribute('aria-atomic', 'true');
@@ -1592,11 +1552,12 @@
         '<span class="result-banner">Waiting for inputs</span><h2>Your result</h2><p class="result-lead">Enter your details and calculate to see the cost, saving estimate, and a quick interpretation.</p>';
 
       const run = (origin = 'submit') => {
+        panel.setAttribute('aria-live', origin === 'submit' ? 'polite' : 'off');
         panel.setAttribute('aria-busy', 'true');
         const errors = validator ? validator(form) : [];
         clearInvalidState(form);
         if (errors.length) {
-          const summary = applyFieldErrors(form, errors);
+          const summary = applyFieldErrors(form, errors, origin === 'submit');
           renderValidationState(panel, 'A few inputs need checking before this estimate becomes useful.');
           if (origin === 'submit') {
             summary?.focus();
@@ -1617,20 +1578,23 @@
             page: pageConfig.path,
             origin,
             ...result.tracking
-          });
+          }, calculatorKey);
         }
       };
 
       const liveRun = (() => {
         let timer;
-        return () => {
+        const schedule = () => {
           clearTimeout(timer);
-          timer = setTimeout(() => run('live'), 160);
+          timer = setTimeout(() => run('live'), 350);
         };
+        schedule.cancel = () => clearTimeout(timer);
+        return schedule;
       })();
 
       form.addEventListener('submit', (event) => {
         event.preventDefault();
+        liveRun.cancel();
         window.homeEnergyScout.track('calculator_submit', {
           page: pageConfig.path,
           tool: calculatorKey
@@ -1638,18 +1602,21 @@
         run('submit');
       });
 
-      form.addEventListener('reset', () =>
+      form.addEventListener('reset', () => {
+        liveRun.cancel();
         setTimeout(() => {
           clearFieldErrors(form);
           clearInvalidState(form);
           panel.dataset.state = 'idle';
           panel.setAttribute('aria-busy', 'false');
           panel.innerHTML = idleHtml;
-        }, 0)
-      );
+          run('reset');
+        }, 0);
+      });
 
       form.querySelectorAll('input, select').forEach((field) => {
         field.addEventListener('change', () => {
+          if (field.name === 'tariffPence') window.homeEnergyScout.track('unit_rate_override', { tool: calculatorKey });
           window.homeEnergyScout.track('calculator_input_change', {
             page: pageConfig.path,
             tool: calculatorKey,
@@ -1661,6 +1628,13 @@
           field.addEventListener('input', liveRun);
         }
       });
+
+      form.querySelectorAll('[data-preset-field]').forEach(button => button.addEventListener('click', () => {
+        const field = form.querySelector(`[name="${button.dataset.presetField}"]`);
+        if (!field) return;
+        if (button.dataset.presetValue) { field.value = button.dataset.presetValue; run('preset'); }
+        else field.focus();
+      }));
 
       run('initial');
     });
@@ -1681,6 +1655,12 @@
     window.addEventListener('scroll', toggleScrolledState, { passive: true });
     addFaqTracking();
     addInternalLinkTracking();
+    document.addEventListener('click', event => {
+      const link = event.target.closest('a[href]');
+      if (!link) return;
+      const url = new URL(link.href, window.location.href);
+      if (url.protocol.startsWith('http') && url.origin !== window.location.origin) window.homeEnergyScout.track('outbound_click', { context: 'external-source', destination: url.hostname });
+    });
     addAdSlotTracking();
     bindCalculators();
   }

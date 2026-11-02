@@ -1,0 +1,259 @@
+{
+  "browser": "156.0.4314.58",
+  "checks": [
+    {
+      "width": 320,
+      "route": "/",
+      "status": "PASS"
+    },
+    {
+      "width": 320,
+      "route": "/running-costs/electric-heater-running-cost/",
+      "status": "PASS"
+    },
+    {
+      "width": 320,
+      "route": "/running-costs/2kw-heater-cost-per-hour/",
+      "status": "PASS"
+    },
+    {
+      "width": 320,
+      "route": "/running-costs/panel-heater-running-cost/",
+      "status": "PASS"
+    },
+    {
+      "width": 320,
+      "route": "/sizing/heater-room-size-calculator/",
+      "status": "PASS"
+    },
+    {
+      "width": 320,
+      "route": "/compare/dehumidifier-vs-heating-to-dry-clothes/",
+      "status": "PASS"
+    },
+    {
+      "width": 320,
+      "route": "/running-costs/appliance-running-cost/",
+      "status": "PASS"
+    },
+    {
+      "width": 320,
+      "route": "/compare/heating-option-comparison/",
+      "status": "PASS"
+    },
+    {
+      "width": 320,
+      "route": "/running-costs/dehumidifier-running-cost/",
+      "status": "PASS"
+    },
+    {
+      "width": 320,
+      "route": "/savings/loft-insulation-savings/",
+      "status": "PASS"
+    },
+    {
+      "width": 320,
+      "route": "/savings/led-lighting-savings/",
+      "status": "PASS"
+    },
+    {
+      "width": 320,
+      "route": "/savings/old-fridge-replacement-savings/",
+      "status": "PASS"
+    },
+    {
+      "width": 320,
+      "route": "/compare/heated-airer-vs-tumble-dryer/",
+      "status": "PASS"
+    },
+    {
+      "width": 320,
+      "route": "/compare/portable-ac-vs-fan-cost/",
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "route": "/",
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "route": "/running-costs/electric-heater-running-cost/",
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "route": "/running-costs/2kw-heater-cost-per-hour/",
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "route": "/running-costs/panel-heater-running-cost/",
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "route": "/sizing/heater-room-size-calculator/",
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "route": "/compare/dehumidifier-vs-heating-to-dry-clothes/",
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "route": "/running-costs/appliance-running-cost/",
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "route": "/compare/heating-option-comparison/",
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "route": "/running-costs/dehumidifier-running-cost/",
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "route": "/savings/loft-insulation-savings/",
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "route": "/savings/led-lighting-savings/",
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "route": "/savings/old-fridge-replacement-savings/",
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "route": "/compare/heated-airer-vs-tumble-dryer/",
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "route": "/compare/portable-ac-vs-fan-cost/",
+      "status": "PASS"
+    },
+    {
+      "width": 1280,
+      "route": "/",
+      "status": "PASS"
+    },
+    {
+      "width": 1280,
+      "route": "/running-costs/electric-heater-running-cost/",
+      "status": "PASS"
+    },
+    {
+      "width": 1280,
+      "route": "/running-costs/2kw-heater-cost-per-hour/",
+      "status": "PASS"
+    },
+    {
+      "width": 1280,
+      "route": "/running-costs/panel-heater-running-cost/",
+      "status": "PASS"
+    },
+    {
+      "width": 1280,
+      "route": "/sizing/heater-room-size-calculator/",
+      "status": "PASS"
+    },
+    {
+      "width": 1280,
+      "route": "/compare/dehumidifier-vs-heating-to-dry-clothes/",
+      "status": "PASS"
+    },
+    {
+      "width": 1280,
+      "route": "/running-costs/appliance-running-cost/",
+      "status": "PASS"
+    },
+    {
+      "width": 1280,
+      "route": "/compare/heating-option-comparison/",
+      "status": "PASS"
+    },
+    {
+      "width": 1280,
+      "route": "/running-costs/dehumidifier-running-cost/",
+      "status": "PASS"
+    },
+    {
+      "width": 1280,
+      "route": "/savings/loft-insulation-savings/",
+      "status": "PASS"
+    },
+    {
+      "width": 1280,
+      "route": "/savings/led-lighting-savings/",
+      "status": "PASS"
+    },
+    {
+      "width": 1280,
+      "route": "/savings/old-fridge-replacement-savings/",
+      "status": "PASS"
+    },
+    {
+      "width": 1280,
+      "route": "/compare/heated-airer-vs-tumble-dryer/",
+      "status": "PASS"
+    },
+    {
+      "width": 1280,
+      "route": "/compare/portable-ac-vs-fan-cost/",
+      "status": "PASS"
+    }
+  ],
+  "metrics": [
+    {
+      "width": 320,
+      "route": "/",
+      "lcp": 656,
+      "cls": 0,
+      "note": "Local headless browser, unthrottled; lab diagnostic, not field CWV. INP unmeasured."
+    },
+    {
+      "width": 320,
+      "route": "/running-costs/electric-heater-running-cost/",
+      "lcp": 232,
+      "cls": 0.047866536820023155,
+      "note": "Local headless browser, unthrottled; lab diagnostic, not field CWV. INP unmeasured."
+    },
+    {
+      "width": 390,
+      "route": "/",
+      "lcp": 156,
+      "cls": 0,
+      "note": "Local headless browser, unthrottled; lab diagnostic, not field CWV. INP unmeasured."
+    },
+    {
+      "width": 390,
+      "route": "/running-costs/electric-heater-running-cost/",
+      "lcp": 92,
+      "cls": 0.04916682296612852,
+      "note": "Local headless browser, unthrottled; lab diagnostic, not field CWV. INP unmeasured."
+    },
+    {
+      "width": 1280,
+      "route": "/",
+      "lcp": 220,
+      "cls": 0,
+      "note": "Local headless browser, unthrottled; lab diagnostic, not field CWV. INP unmeasured."
+    },
+    {
+      "width": 1280,
+      "route": "/running-costs/electric-heater-running-cost/",
+      "lcp": 112,
+      "cls": 0.01795033092498779,
+      "note": "Local headless browser, unthrottled; lab diagnostic, not field CWV. INP unmeasured."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+import fs from 'node:fs';
+import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
+import { htmlFiles } from './audit-site.mjs';
+import { emittedAssetFiles } from './lib/versioned-assets.mjs';
+const files=[...htmlFiles(),'sitemap.xml',...emittedAssetFiles()];
+const hash=file=>createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+const before=new Map(files.map(f=>[f,hash(f)]));
+const result=spawnSync(process.execPath,['scripts/build.mjs'],{stdio:'inherit'});
+if(result.status!==0)process.exit(result.status || 1);
+const changed=files.filter(f=>before.get(f)!==hash(f));
+if(JSON.stringify([...emittedAssetFiles()].sort())!==JSON.stringify(files.filter(f=>/\.[a-f0-9]{16}\.(js|css)$/.test(f)).sort())) changed.push('fingerprinted asset inventory');
+if(changed.length)throw new Error(`Regeneration changed output: ${changed.join(', ')}`);
+console.log(`Idempotence passed: ${files.length} static outputs unchanged byte-for-byte.`);

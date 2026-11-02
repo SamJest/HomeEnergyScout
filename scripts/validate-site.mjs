@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import { rateIssues } from './audit-site.mjs';
 import {
   pagePathFromFile,
   readContentData
@@ -44,6 +45,7 @@ function walk(dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
+      if (entry.name.startsWith(".") || ["node_modules", "test-results", "playwright-report", "docs", "tests", "codex-growth-pack"].includes(entry.name)) continue;
       walk(full);
     } else if (entry.isFile() && /\.html$/i.test(entry.name)) {
       htmlFiles.push(full);
@@ -70,9 +72,7 @@ function addIssue(file, message) {
 
 walk(root);
 
-if (new Date(`${currentEnergyPeriod.reviewDue}T00:00:00Z`) < new Date()) {
-  addIssue('data/energy-rates.json', `energy rates are past reviewDue ${currentEnergyPeriod.reviewDue}`);
-}
+for (const issue of rateIssues(currentEnergyPeriod)) addIssue('data/energy-rates.json',issue);
 
 for (const file of htmlFiles) {
   const rel = relative(file);
